@@ -14,7 +14,6 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-
     //Constructor
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
@@ -54,11 +53,13 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+
+    //Draw out Chess Board to get Logic Right
     public interface PieceMovesCalculator {
-
-
-
-        //Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
+        //return type        //function name
+        Collection<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition);
+        //method returns a Collection (which is a list with any data type) that contains ChessMove objects
+        //the return collection is all the possible ChessMove objects
     }
 
 

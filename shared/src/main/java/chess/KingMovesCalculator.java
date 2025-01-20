@@ -1,5 +1,6 @@
 package chess;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,9 +22,35 @@ public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition) {
-        List<ChessMove> moves = new ArrayList<>();
-        ChessMove newMove = new ChessMove([0][0],[0][1], null);
-        moves.add(newMove);
-        return moves;
+        //What to Check For with the King
+        //Is the Potential Move in bounds
+        //Is there one of its own pieces there
+        //Can't be put in check?
+
+        List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
+        ChessPiece myPiece = board.getPiece(myPosition);
+        boolean isWhite = (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE);
+
+        for(ChessPosition moveOffset : PossibleKingMoves ) {
+            int testRow = myPosition.getRow() + moveOffset.getRow();
+            int testCol = myPosition.getColumn() + moveOffset.getColumn();
+
+            //If In Bounds of the Board
+            if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
+                ChessPosition newPosition = new ChessPosition(testRow, testCol);
+                ChessPiece targetPiece = board.getPiece(newPosition);
+
+                //check if target position is null or opponents piece
+                if(targetPiece == null || targetPiece.getTeamColor() != myPiece.getTeamColor()) {
+                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+                    validMoves.add(newMove);
+                }
+            }
+
+
+        }
+        ///ChessMove newMove = new ChessMove();
+        ///moves.add(newMove);
+        return validMoves;
     }
 }

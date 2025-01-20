@@ -73,10 +73,7 @@ public class ChessPiece {
 
     //Draw out Chess Board to get Logic Right
     public interface PieceMovesCalculator {
-        //return type        //function name
         Collection<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition);
-        //method returns a Collection (which is a list with any data type) that contains ChessMove objects
-        //the return collection is all the possible ChessMove objects
     }
 
 

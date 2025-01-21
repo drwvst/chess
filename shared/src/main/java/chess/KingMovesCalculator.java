@@ -25,11 +25,9 @@ public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the King
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        //Can't be put in check?
 
         List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
         ChessPiece myPiece = board.getPiece(myPosition);
-        boolean isWhite = (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE);
 
         for(ChessPosition moveOffset : PossibleKingMoves ) {
             int testRow = myPosition.getRow() + moveOffset.getRow();
@@ -38,6 +36,7 @@ public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
             //If In Bounds of the Board
             if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
                 ChessPosition newPosition = new ChessPosition(testRow, testCol);
+                //Save next space to get knowledge about it
                 ChessPiece targetPiece = board.getPiece(newPosition);
 
                 //check if target position is null or opponents piece
@@ -49,8 +48,6 @@ public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
 
 
         }
-        ///ChessMove newMove = new ChessMove();
-        ///moves.add(newMove);
         return validMoves;
     }
 }

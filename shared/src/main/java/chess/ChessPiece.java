@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.EnumMap;
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -99,6 +96,64 @@ public class ChessPiece {
             return calculator.validMoves(board, myPosition);
         }
         return new ArrayList<>();
+    }
+
+    static Collection<ChessMove> KKValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleKMoves) {
+        List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
+        ChessPiece myPiece = board.getPiece(myPosition);
+
+        for(ChessPosition moveOffset : possibleKMoves) {
+            int testRow = myPosition.getRow() + moveOffset.getRow();
+            int testCol = myPosition.getColumn() + moveOffset.getColumn();
+
+            //If In Bounds of the Board
+            if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
+                ChessPosition newPosition = new ChessPosition(testRow, testCol);
+                //Save next space to get knowledge about it
+                ChessPiece targetSpace = board.getPiece(newPosition);
+
+                //check if target position is null or opponents piece
+                if(targetSpace == null || targetSpace.getTeamColor() != myPiece.getTeamColor()) {
+                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+                    validMoves.add(newMove);
+                }
+            }
+
+
+        }
+        return validMoves;
+    }
+
+    static Collection<ChessMove> QBRValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleQBRMoves) {
+        List<ChessMove> validMoves = new ArrayList<>();
+        ChessPiece myPiece = board.getPiece(myPosition);
+
+        for(ChessPosition moveOffset : possibleQBRMoves) {
+            int testRow = myPosition.getRow() + moveOffset.getRow();
+            int testCol = myPosition.getColumn() + moveOffset.getColumn();
+
+                //If In Bounds of the Board
+                while (testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
+                    ChessPosition newPosition = new ChessPosition(testRow, testCol);
+                    //Save next space to get knowledge about it
+                    ChessPiece targetSpace = board.getPiece(newPosition);
+
+                    //check if target position is null or opponents piece
+                    if (targetSpace == null || targetSpace.getTeamColor() != myPiece.getTeamColor()) {
+                        ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+                        validMoves.add(newMove);
+                        if(targetSpace != null && targetSpace.getTeamColor() != myPiece.getTeamColor()) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    //Increment to next square
+                    testRow += moveOffset.getRow();
+                    testCol += moveOffset.getColumn();
+                }
+            }
+        return validMoves;
     }
 
 }

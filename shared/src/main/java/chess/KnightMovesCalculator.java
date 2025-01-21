@@ -1,20 +1,20 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+
+import static chess.ChessPiece.KKValidMoves;
 
 public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
     private static final ChessPosition[] PossibleKnightMoves = {
-            new ChessPosition(0, 1), //Forward
-            new ChessPosition(0, -1), //Backward
-            new ChessPosition(1, 0), //Right
-            new ChessPosition(-1, 0), //Left
-            new ChessPosition(-1, -1), //Back Left
-            new ChessPosition(1, -1), //Back Right
-            new ChessPosition(-1, 1), //Front Left
-            new ChessPosition(1, 1) //Front Right
+            new ChessPosition(2, 1), // Forward right Top
+            new ChessPosition(1, 2), // Forward right Bottom
+            new ChessPosition(-1, 2), // Back right Top
+            new ChessPosition(-2, 1), // Back right Bottom
+            new ChessPosition(-2, -1), // Back left Bottom
+            new ChessPosition(-1, -2), // Back left Top
+            new ChessPosition(1, -2), // Forward left bottom
+            new ChessPosition(2, -1) // Forward left top
     };
     //With the king and the knight, you only have to test if the spot you're trying to go to is on the board, and not one of your own pieces
     //put a public static function in ChessPiece that will check those conditions that you can call in here and Knight
@@ -25,28 +25,6 @@ public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
 
-        List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
-        ChessPiece myPiece = board.getPiece(myPosition);
-
-        for(ChessPosition moveOffset : PossibleKnightMoves ) {
-            int testRow = myPosition.getRow() + moveOffset.getRow();
-            int testCol = myPosition.getColumn() + moveOffset.getColumn();
-
-            //If In Bounds of the Board
-            if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
-                ChessPosition newPosition = new ChessPosition(testRow, testCol);
-                //Save next space to get knowledge about it
-                ChessPiece targetPiece = board.getPiece(newPosition);
-
-                //check if target position is null or opponents piece
-                if(targetPiece == null || targetPiece.getTeamColor() != myPiece.getTeamColor()) {
-                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
-                    validMoves.add(newMove);
-                }
-            }
-
-
-        }
-        return validMoves;
+        return KKValidMoves(board, myPosition, PossibleKnightMoves);
     }
 }

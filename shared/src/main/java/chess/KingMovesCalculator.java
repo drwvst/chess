@@ -1,9 +1,8 @@
 package chess;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+
+import static chess.ChessPiece.KKValidMoves;
 
 public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
@@ -25,29 +24,6 @@ public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the King
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-
-        List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
-        ChessPiece myPiece = board.getPiece(myPosition);
-
-        for(ChessPosition moveOffset : PossibleKingMoves ) {
-            int testRow = myPosition.getRow() + moveOffset.getRow();
-            int testCol = myPosition.getColumn() + moveOffset.getColumn();
-
-            //If In Bounds of the Board
-            if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
-                ChessPosition newPosition = new ChessPosition(testRow, testCol);
-                //Save next space to get knowledge about it
-                ChessPiece targetPiece = board.getPiece(newPosition);
-
-                //check if target position is null or opponents piece
-                if(targetPiece == null || targetPiece.getTeamColor() != myPiece.getTeamColor()) {
-                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
-                    validMoves.add(newMove);
-                }
-            }
-
-
-        }
-        return validMoves;
+        return KKValidMoves(board, myPosition, PossibleKingMoves);
     }
 }

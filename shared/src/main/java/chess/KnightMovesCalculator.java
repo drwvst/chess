@@ -24,7 +24,6 @@ public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the Knight
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-
         return KKValidMoves(board, myPosition, PossibleKnightMoves);
     }
 }

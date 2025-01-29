@@ -84,6 +84,8 @@ public class ChessPiece {
     public interface PieceMovesCalculator {
         //Listed out Methods for implement Classes to override
         //Here for example, the only method that is over-ridden in each calculator is valid Moves
+
+        /// THIS IS THE METHOD THAT IS TO BE OVERRIDDEN BY IMPLEMENTS CLASSES
         Collection<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition);
     }
 
@@ -118,8 +120,6 @@ public class ChessPiece {
                     validMoves.add(newMove);
                 }
             }
-
-
         }
         return validMoves;
     }
@@ -143,10 +143,10 @@ public class ChessPiece {
                         ChessMove newMove = new ChessMove(myPosition, newPosition, null);
                         validMoves.add(newMove);
                         if(targetSpace != null && targetSpace.getTeamColor() != myPiece.getTeamColor()) {
-                            break;
+                            break; ///Breaks out of the While loop
                         }
                     } else {
-                        break;
+                        break; ///Breaks out of the While loop
                     }
                     //Increment to next square
                     testRow += moveOffset.getRow();

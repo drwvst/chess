@@ -25,15 +25,7 @@ public class PawnMovesCalculator implements ChessPiece.PieceMovesCalculator {
         ChessPosition forwardPosition = new ChessPosition(myPosition.getRow() + direction, myPosition.getColumn());
         if (isWithinBounds(forwardPosition) && board.getPiece(forwardPosition) == null) {
             //Promotion Logic
-            if ((myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && forwardPosition.getRow() == 8) ||
-                    (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && forwardPosition.getRow() == 1)) {
-                validMoves.add(new ChessMove(myPosition, forwardPosition, ChessPiece.PieceType.QUEEN));
-                validMoves.add(new ChessMove(myPosition, forwardPosition, ChessPiece.PieceType.ROOK));
-                validMoves.add(new ChessMove(myPosition, forwardPosition, ChessPiece.PieceType.BISHOP));
-                validMoves.add(new ChessMove(myPosition, forwardPosition, ChessPiece.PieceType.KNIGHT));
-            } else {
-                validMoves.add(new ChessMove(myPosition, forwardPosition, null));
-            }
+            PromotionOrStep(myPosition, validMoves, myPiece, forwardPosition);
 
             //Double Move
             if ((myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) ||
@@ -56,15 +48,7 @@ public class PawnMovesCalculator implements ChessPiece.PieceMovesCalculator {
             if (isWithinBounds(diagonalPosition)) {
                 ChessPiece targetPiece = board.getPiece(diagonalPosition);
                 if (targetPiece != null && targetPiece.getTeamColor() != myPiece.getTeamColor()) {
-                    if ((myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && diagonalPosition.getRow() == 8) ||
-                            (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && diagonalPosition.getRow() == 1)) {
-                        validMoves.add(new ChessMove(myPosition, diagonalPosition, ChessPiece.PieceType.QUEEN));
-                        validMoves.add(new ChessMove(myPosition, diagonalPosition, ChessPiece.PieceType.ROOK));
-                        validMoves.add(new ChessMove(myPosition, diagonalPosition, ChessPiece.PieceType.BISHOP));
-                        validMoves.add(new ChessMove(myPosition, diagonalPosition, ChessPiece.PieceType.KNIGHT));
-                    } else {
-                        validMoves.add(new ChessMove(myPosition, diagonalPosition, null));
-                    }
+                    PromotionOrStep(myPosition, validMoves, myPiece, diagonalPosition);
                 }
             }
             //Move forward one square if destination is empty
@@ -75,5 +59,17 @@ public class PawnMovesCalculator implements ChessPiece.PieceMovesCalculator {
 
         }
         return validMoves;
+    }
+
+    private void PromotionOrStep(ChessPosition myPosition, List<ChessMove> validMoves, ChessPiece myPiece, ChessPosition PositionType) {
+        if ((myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && PositionType.getRow() == 8) ||
+                (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && PositionType.getRow() == 1)) {
+            validMoves.add(new ChessMove(myPosition, PositionType, ChessPiece.PieceType.QUEEN));
+            validMoves.add(new ChessMove(myPosition, PositionType, ChessPiece.PieceType.ROOK));
+            validMoves.add(new ChessMove(myPosition, PositionType, ChessPiece.PieceType.BISHOP));
+            validMoves.add(new ChessMove(myPosition, PositionType, ChessPiece.PieceType.KNIGHT));
+        } else {
+            validMoves.add(new ChessMove(myPosition, PositionType, null));
+        }
     }
 }

@@ -9,9 +9,18 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    /// NOTES FOR PHASE
+    //tryMove and UndoMove Methods
+    //Make a bunch of private variables here
+    //First implement isInCheck
+
+    //Keep track of who's turn
+
+
+    private ChessBoard board = new ChessBoard();
 
     public ChessGame() {
-
+        //getBoard().resetBoard();
     }
 
     /**
@@ -46,6 +55,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        //Checks Check, Checkmate, Stalemate
+        //needs to filter out the moves that it cant move to
+
         throw new RuntimeException("Not implemented");
     }
 
@@ -57,6 +69,8 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         throw new RuntimeException("Not implemented");
+        //Updates the board to have the right piece in the right place based on the selected move
+        //Updates Pieces for pawn promotions
     }
 
     /**

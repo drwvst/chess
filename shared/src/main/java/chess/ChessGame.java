@@ -20,7 +20,7 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
 
     public ChessGame() {
-        //getBoard().resetBoard();
+        board.resetBoard();
         this.currentTurn = TeamColor.WHITE;
     }
 
@@ -144,7 +144,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        board.resetBoard();
+       this.board = board;
     }
 
     /**

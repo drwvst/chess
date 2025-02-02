@@ -117,6 +117,43 @@ public class ChessGame {
         return false;
     }
 
+    //Override for Checkmate Testing
+    public boolean isInCheck(TeamColor teamColor, ChessBoard testBoard) {
+        //finding the kings Position
+        ChessPosition kingPosition = null;
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = testBoard.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() == teamColor
+                        && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPosition = position;
+                }
+            }
+        }
+
+        //Check if the king is Attacked
+        //iterate through all opponent pieces
+        //For each opponent piece, get all of its valid moves using pieceMoves(board, myPosition)
+        //If any of these moves can reach the kings position, the king is in check
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = testBoard.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() != teamColor){ //opponent pieces
+                    for(ChessMove move : piece.pieceMoves(testBoard, position)){
+                        if (move.getEndPosition().equals(kingPosition)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -124,6 +161,9 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        //Make a printBoard function for debugging
+        //instead of doing a move and undo move logic to test if the move could be made, make a temporary board called
+            //testBoard where you make the move on that board and test if the king is still in check on that temp board
         throw new RuntimeException("Not implemented");
     }
 
@@ -156,4 +196,38 @@ public class ChessGame {
         setBoard(board);
         return board;
     }
+
+    public void printBoard(ChessBoard board) {
+        for (int row = 8; row >= 1; row--) {
+            System.out.print("|");
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                if (piece != null) {
+                    char pieceChar = getPieceChar(piece);
+                    System.out.print(pieceChar);
+                } else {
+                    System.out.print(" ");
+                }
+                System.out.print("|");
+            }
+            System.out.println();
+        }
+    }
+
+    // Helper method to determine the correct character for a piece
+    private char getPieceChar(ChessPiece piece) {
+        char pieceChar;
+        switch (piece.getPieceType()) {
+            case KING -> pieceChar = 'k';
+            case QUEEN -> pieceChar = 'q';
+            case ROOK -> pieceChar = 'r';
+            case BISHOP -> pieceChar = 'b';
+            case KNIGHT -> pieceChar = 'n';
+            case PAWN -> pieceChar = 'p';
+            default -> pieceChar = ' ';
+        }
+        // Convert to uppercase if it's a white piece
+        return piece.getTeamColor() == TeamColor.WHITE ? Character.toUpperCase(pieceChar) : pieceChar;
+    }
+
 }

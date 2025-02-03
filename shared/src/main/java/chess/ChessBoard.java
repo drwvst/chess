@@ -10,9 +10,20 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private final ChessPiece[][] board = new ChessPiece[8][8]; //This is the Board
+    private ChessPiece[][] board = new ChessPiece[8][8]; //This is the Board
     public ChessBoard() {
         
+    }
+    // Copy constructor
+    public ChessBoard(ChessBoard other) {
+        board = new ChessPiece[8][8];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (other.board[row][col] != null) {
+                    board[row][col] = other.board[row][col];
+                }
+            }
+        }
     }
 
     /**

@@ -10,9 +10,6 @@ import java.util.Collection;
  */
 public class ChessGame {
     /// NOTES FOR PHASE
-    //tryMove and UndoMove Methods
-    //Make a bunch of private variables here
-    //First implement isInCheck
 
     //Keep track of who's turn
     /// WHEN FIGURING OUT A METHOD, LOOK AT THE PARAMETERS AND MAKE A NOTES LIST OF THE METHODS OF THE PARAMETER TYPES
@@ -83,6 +80,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         //finding the kings Position
+        //printBoard(board);
         ChessPosition kingPosition = null;
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
@@ -161,9 +159,37 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        //Make a printBoard function for debugging
+        /// Syntax helpers
+            // printBoard(testBoard);
+
+        // Use printBoard function for debugging
         //instead of doing a move and undo move logic to test if the move could be made, make a temporary board called
             //testBoard where you make the move on that board and test if the king is still in check on that temp board
+        ChessBoard testBoard = new ChessBoard(board);
+
+        //Framework:
+        if(isInCheck(teamColor)){
+            // make a list or copy a list of all possible king moves - use King validMoves list already calculated
+                    //piece.pieceMoves(board, position)
+            //make a loop for every move the king could make with a list of moves
+            //in the loop preform the move on the board copy testBoard
+            //in that loop test if that move put the king in check by passing in testBoard to the override of isInCheck
+
+                //for (ChessMove move : piece.pieceMoves(board, position))
+                    //testBoard = new ChessBoard(board);
+                    //preform that move on testBoard
+                    //if the move puts the king in check:
+                        //if that position on the board could be validly moved to by another piece of your team - loop through all possible pieces and moves
+                            //testBoard = new ChessBoard(board);
+                            //do that move on testBoard
+                            //if !isInCheck(teamColor, testBoard)
+                                //return false
+                        //testBoard = new ChessBoard(board);
+                    //if a move can be made that doesn't put the king in check
+                        //return false
+                //return true
+
+        }
         throw new RuntimeException("Not implemented");
     }
 
@@ -194,6 +220,7 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         setBoard(board);
+        //printBoard(board);
         return board;
     }
 
@@ -212,6 +239,7 @@ public class ChessGame {
             }
             System.out.println();
         }
+        System.out.println("\n");
     }
 
     // Helper method to determine the correct character for a piece

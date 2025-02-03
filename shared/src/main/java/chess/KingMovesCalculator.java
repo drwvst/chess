@@ -6,7 +6,7 @@ import static chess.ChessPiece.KKValidMoves;
 
 public class KingMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] PossibleKingMoves = {
+    public static final ChessPosition[] PossibleKingMoves = {
             new ChessPosition(0, 1), //Forward
             new ChessPosition(0, -1), //Backward
             new ChessPosition(1, 0), //Right

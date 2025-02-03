@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 
+import static chess.KingMovesCalculator.PossibleKingMoves;
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -81,18 +82,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         //finding the kings Position
         //printBoard(board);
-        ChessPosition kingPosition = null;
-        for (int row = 1; row <= 8; row++) {
-            for (int col = 1; col <= 8; col++) {
-                ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(position);
-
-                if (piece != null && piece.getTeamColor() == teamColor
-                        && piece.getPieceType() == ChessPiece.PieceType.KING){
-                    kingPosition = position;
-                }
-            }
-        }
+        ChessPosition kingPosition = findKing(teamColor);
 
         //Check if the king is Attacked
         //iterate through all opponent pieces
@@ -163,16 +153,14 @@ public class ChessGame {
             // printBoard(testBoard);
 
         // Use printBoard function for debugging
-        //instead of doing a move and undo move logic to test if the move could be made, make a temporary board called
-            //testBoard where you make the move on that board and test if the king is still in check on that temp board
-        ChessBoard testBoard = new ChessBoard(board);
 
         //Framework:
         if(isInCheck(teamColor)){
-            // make a list or copy a list of all possible king moves - use King validMoves list already calculated
+            //DONE - find the king on the board
+            // DONE - Already Made - make a list or copy a list of all possible king moves - use King validMoves list already calculated
                     //piece.pieceMoves(board, position)
-            //make a loop for every move the king could make with a list of moves
-            //in the loop preform the move on the board copy testBoard
+            // DONE - make a loop for every move the king could make with a list of moves
+            // in the loop preform the move on the board copy testBoard
             //in that loop test if that move put the king in check by passing in testBoard to the override of isInCheck
 
                 //for (ChessMove move : piece.pieceMoves(board, position))
@@ -188,6 +176,28 @@ public class ChessGame {
                     //if a move can be made that doesn't put the king in check
                         //return false
                 //return true
+            ChessPosition kingPosition = findKing(teamColor);
+            ChessPiece piece = board.getPiece(kingPosition);
+            ChessBoard testBoard = new ChessBoard(board);
+            for (ChessPosition moveOffset : PossibleKingMoves){
+                testBoard = new ChessBoard(board);
+                //preform move on testboard
+                int testRow = kingPosition.getRow() + moveOffset.getRow();
+                int testCol = kingPosition.getColumn() + moveOffset.getColumn();
+
+                if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
+                    ChessPosition newPosition = new ChessPosition(testRow, testCol);
+                    //Make Move on testBoard
+
+
+                    //check if target position is null or opponents piece
+//                    if(targetSpace == null || targetSpace.getTeamColor() != myPiece.getTeamColor()) {
+//                        ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+//                        validMoves.add(newMove);
+//                    }
+                }
+
+            }
 
         }
         throw new RuntimeException("Not implemented");
@@ -240,6 +250,23 @@ public class ChessGame {
             System.out.println();
         }
         System.out.println("\n");
+    }
+
+    public ChessPosition findKing(TeamColor teamColor) {
+        //finding the kings Position
+        //printBoard(board);
+        ChessPosition kingPosition = null;
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor
+                        && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPosition = position;
+                }
+            }
+        }
+        return kingPosition;
     }
 
     // Helper method to determine the correct character for a piece

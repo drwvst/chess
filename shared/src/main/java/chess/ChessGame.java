@@ -236,14 +236,28 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        //if not in checkmate
-        //make every move around the king on testBoard and check if he is put in check
-            //on each move test if that threat position can be blocked like you did in isInCheckMate
-        //if put in check for everyMove
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
 
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    for (ChessMove move : piece.pieceMoves(board, position)) {
+                        ChessBoard testBoard = new ChessBoard(board);
+                        testBoard.addPiece(move.getEndPosition(), piece);
+                        testBoard.addPiece(position, null);
 
-
-        throw new RuntimeException("Not implemented");
+                        if (!isInCheck(teamColor, testBoard)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**

@@ -2,11 +2,11 @@ package chess;
 
 import java.util.Collection;
 
-import static chess.ChessPiece.KKValidMoves;
+import static chess.ChessPiece.kkValidMoves;
 
 public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] PossibleKnightMoves = {
+    private static final ChessPosition[] possibleKnightMoves = {
             new ChessPosition(2, 1), // Forward right Top
             new ChessPosition(1, 2), // Forward right Bottom
             new ChessPosition(-1, 2), // Back right Top
@@ -24,6 +24,6 @@ public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the Knight
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        return KKValidMoves(board, myPosition, PossibleKnightMoves);
+        return kkValidMoves(board, myPosition, possibleKnightMoves);
     }
 }

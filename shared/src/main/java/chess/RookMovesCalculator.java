@@ -1,13 +1,12 @@
 package chess;
 
 import java.util.Collection;
-import java.util.List;
 
-import static chess.ChessPiece.QBRValidMoves;
+import static chess.ChessPiece.qbrValidMoves;
 
 public class RookMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] PossibleRookMoves = {
+    private static final ChessPosition[] possibleRookMoves = {
             new ChessPosition(1, 0), //Forward
             new ChessPosition(-1, 0), //Backward
             new ChessPosition(0, 1), //Right
@@ -21,6 +20,6 @@ public class RookMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the King
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        return QBRValidMoves(board, myPosition, PossibleRookMoves);
+        return qbrValidMoves(board, myPosition, possibleRookMoves);
     }
 }

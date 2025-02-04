@@ -1,9 +1,8 @@
 package chess;
 
 import java.util.Collection;
-import java.util.List;
 
-import static chess.ChessPiece.QBRValidMoves;
+import static chess.ChessPiece.qbrValidMoves;
 
 public class BishopMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
@@ -21,6 +20,6 @@ public class BishopMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the King
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        return QBRValidMoves(board, myPosition, PossibleBishopMoves);
+        return qbrValidMoves(board, myPosition, PossibleBishopMoves);
     }
 }

@@ -100,7 +100,7 @@ public class ChessPiece {
         return new ArrayList<>();
     }
 
-    static Collection<ChessMove> KKValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleKMoves) {
+    static Collection<ChessMove> kkValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleKMoves) {
         List<ChessMove> validMoves = new ArrayList<>(); //List of Valid Moves
         ChessPiece myPiece = board.getPiece(myPosition);
 
@@ -124,7 +124,7 @@ public class ChessPiece {
         return validMoves;
     }
 
-    static Collection<ChessMove> QBRValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleQBRMoves) {
+    static Collection<ChessMove> qbrValidMoves(ChessBoard board, ChessPosition myPosition, ChessPosition[] possibleQBRMoves) {
         List<ChessMove> validMoves = new ArrayList<>();
         ChessPiece myPiece = board.getPiece(myPosition);
 

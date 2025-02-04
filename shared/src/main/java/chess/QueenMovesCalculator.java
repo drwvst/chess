@@ -7,7 +7,7 @@ import static chess.ChessPiece.qbrValidMoves;
 
 public class QueenMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] possibleQueenMoves = {
+    private static final ChessPosition[] POSSIBLE_QUEEN_MOVES = {
             new ChessPosition(1, 0), //Forward
             new ChessPosition(-1, 0), //Backward
             new ChessPosition(0, 1), //Right
@@ -22,6 +22,6 @@ public class QueenMovesCalculator implements ChessPiece.PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition) {
-        return qbrValidMoves(board, myPosition, possibleQueenMoves);
+        return qbrValidMoves(board, myPosition, POSSIBLE_QUEEN_MOVES);
     }
 }

@@ -6,7 +6,7 @@ import static chess.ChessPiece.qbrValidMoves;
 
 public class BishopMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] PossibleBishopMoves = {
+    private static final ChessPosition[] POSSIBLE_BISHOP_MOVES = {
             new ChessPosition(1, 1), // Forward Right
             new ChessPosition(1, -1), // Forward Left
             new ChessPosition(-1, 1), // Down Right
@@ -20,6 +20,6 @@ public class BishopMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the King
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        return qbrValidMoves(board, myPosition, PossibleBishopMoves);
+        return qbrValidMoves(board, myPosition, POSSIBLE_BISHOP_MOVES);
     }
 }

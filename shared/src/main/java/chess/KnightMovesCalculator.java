@@ -6,7 +6,7 @@ import static chess.ChessPiece.kkValidMoves;
 
 public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
     //List of All Possible Moves
-    private static final ChessPosition[] possibleKnightMoves = {
+    private static final ChessPosition[] POSSIBLE_KNIGHT_MOVES = {
             new ChessPosition(2, 1), // Forward right Top
             new ChessPosition(1, 2), // Forward right Bottom
             new ChessPosition(-1, 2), // Back right Top
@@ -24,6 +24,6 @@ public class KnightMovesCalculator implements ChessPiece.PieceMovesCalculator {
         //What to Check For with the Knight
         //Is the Potential Move in bounds
         //Is there one of its own pieces there
-        return kkValidMoves(board, myPosition, possibleKnightMoves);
+        return kkValidMoves(board, myPosition, POSSIBLE_KNIGHT_MOVES);
     }
 }

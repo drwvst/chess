@@ -314,6 +314,7 @@ public class ChessGame {
         return board;
     }
 
+    /** use for debugging
     public void printBoard(ChessBoard board) {
         for (int row = 8; row >= 1; row--) {
             System.out.print("|");
@@ -331,6 +332,7 @@ public class ChessGame {
         }
         System.out.println("\n");
     }
+    **/
 
     public ChessPosition findKing(TeamColor teamColor) {
         //finding the kings Position

@@ -1,6 +1,6 @@
 package chess;
 
-import java.util.Collection;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -147,37 +147,23 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
+
     public boolean isInCheckmate(TeamColor teamColor) {
-        /// Syntax helpers
-            // printBoard(testBoard);
-
-        // Use printBoard function for debugging
-
+        //DOES NOT account for other pieces capturing the attacking piece to remove the check
+            //needs fixed
+            //Identify the pieces that are attacking the king
+            //Check if any of your team’s pieces can capture the attacking piece to remove the check.
+        
         //Framework:
+        printBoard(board);
         if(isInCheck(teamColor)){
-            //DONE - find the king on the board
-            // DONE - Already Made - make a list or copy a list of all possible king moves - use King validMoves list already calculated
-                    //piece.pieceMoves(board, position)
-            // DONE - make a loop for every move the king could make with a list of moves
-            // in the loop preform the move on the board copy testBoard
-            //in that loop test if that move put the king in check by passing in testBoard to the override of isInCheck
-
-                // DONE - for (ChessMove move : piece.pieceMoves(board, position))
-                    // DONE - testBoard = new ChessBoard(board);
-                    // DONE - preform that move on testBoard
-                    // if the move puts the king in check:
-                        //if that position on the board could be validly moved to by another piece of your team - loop through all possible pieces and moves
-                            //testBoard = new ChessBoard(board);
-                            //do that move on testBoard
-                            //if !isInCheck(teamColor, testBoard)
-                                //return false
-                        // testBoard = new ChessBoard(board);
-                    //if a move can be made that doesn't put the king in check
-                        //return false
-                //return true
             ChessPosition kingPosition = findKing(teamColor);
             ChessPiece kingPiece = board.getPiece(kingPosition);
             ChessBoard testBoard = null;
+
+            List<ChessMove> threatPieces = new ArrayList<>();
+
+
             for (ChessMove move : kingPiece.pieceMoves(board, kingPosition)){ //Chess move objects can be broken down into chess positions to make moves
                 testBoard = new ChessBoard(board);
 
@@ -187,6 +173,8 @@ public class ChessGame {
                 ChessPiece testKing = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
                 testBoard.addPiece(newPosition, testKing);
                 testBoard.addPiece(kingPosition, null);
+                System.out.println("TEST BOARD:");
+                printBoard(testBoard);
                     //DONE
                 if(isInCheck(teamColor, testBoard)){
                     //loop through all pieces on you team and see if they can move to the new position
@@ -196,9 +184,30 @@ public class ChessGame {
                             ChessPosition position = new ChessPosition(row, col);
                             ChessPiece piece = testBoard.getPiece(position);
 
+                            if(piece != null && piece.getTeamColor() != teamColor){ //opponent pieces
+                                for(ChessMove validMove : piece.pieceMoves(testBoard, position)){
+                                    if (validMove.getEndPosition().equals(kingPosition)){ //if can attack king
+                                        threatPieces.add(validMove);
+                                    }
+                                }
+                            }
+
                             if (piece != null && piece.getTeamColor() == teamColor){ //friendly pieces
                                 for(ChessMove validMove : piece.pieceMoves(testBoard, position)){
                                     testBoard = new ChessBoard(board);
+                                    for(ChessMove threats : threatPieces){
+                                        if(validMove.getEndPosition().equals(threats.getStartPosition())){
+                                            //make move on testBoard
+                                            //test if still in check
+                                            //if no longer in check return false
+                                            testBoard.addPiece(threats.getStartPosition(), null);
+                                            testBoard.addPiece(validMove.getEndPosition(), piece);
+                                            testBoard.addPiece(validMove.getStartPosition(), null);
+                                            if (!isInCheck(teamColor, testBoard)){
+                                                return false;
+                                            }
+                                        }
+                                    }
                                     if (validMove.getEndPosition().equals(newPosition)){
                                         testBoard.addPiece(validMove.getEndPosition(), piece);
                                         testBoard.addPiece(validMove.getStartPosition(), null);
@@ -227,6 +236,13 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        //if not in checkmate
+        //make every move around the king on testBoard and check if he is put in check
+            //on each move test if that threat position can be blocked like you did in isInCheckMate
+        //if put in check for everyMove
+
+
+
         throw new RuntimeException("Not implemented");
     }
 

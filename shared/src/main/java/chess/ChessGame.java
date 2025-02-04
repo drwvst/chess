@@ -2,7 +2,6 @@ package chess;
 
 import java.util.Collection;
 
-import static chess.KingMovesCalculator.PossibleKingMoves;
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -163,44 +162,61 @@ public class ChessGame {
             // in the loop preform the move on the board copy testBoard
             //in that loop test if that move put the king in check by passing in testBoard to the override of isInCheck
 
-                //for (ChessMove move : piece.pieceMoves(board, position))
-                    //testBoard = new ChessBoard(board);
-                    //preform that move on testBoard
-                    //if the move puts the king in check:
+                // DONE - for (ChessMove move : piece.pieceMoves(board, position))
+                    // DONE - testBoard = new ChessBoard(board);
+                    // DONE - preform that move on testBoard
+                    // if the move puts the king in check:
                         //if that position on the board could be validly moved to by another piece of your team - loop through all possible pieces and moves
                             //testBoard = new ChessBoard(board);
                             //do that move on testBoard
                             //if !isInCheck(teamColor, testBoard)
                                 //return false
-                        //testBoard = new ChessBoard(board);
+                        // testBoard = new ChessBoard(board);
                     //if a move can be made that doesn't put the king in check
                         //return false
                 //return true
             ChessPosition kingPosition = findKing(teamColor);
-            ChessPiece piece = board.getPiece(kingPosition);
-            ChessBoard testBoard = new ChessBoard(board);
-            for (ChessPosition moveOffset : PossibleKingMoves){
+            ChessPiece kingPiece = board.getPiece(kingPosition);
+            ChessBoard testBoard = null;
+            for (ChessMove move : kingPiece.pieceMoves(board, kingPosition)){ //Chess move objects can be broken down into chess positions to make moves
                 testBoard = new ChessBoard(board);
+
                 //preform move on testboard
-                int testRow = kingPosition.getRow() + moveOffset.getRow();
-                int testCol = kingPosition.getColumn() + moveOffset.getColumn();
+                ChessPosition newPosition =
+                        new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+                ChessPiece testKing = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
+                testBoard.addPiece(newPosition, testKing);
+                testBoard.addPiece(kingPosition, null);
+                    //DONE
+                if(isInCheck(teamColor, testBoard)){
+                    //loop through all pieces on you team and see if they can move to the new position
+                    testBoard = new ChessBoard(board);
+                    for (int row = 1; row <= 8; row++) {
+                        for (int col = 1; col <= 8; col++) {
+                            ChessPosition position = new ChessPosition(row, col);
+                            ChessPiece piece = testBoard.getPiece(position);
 
-                if(testRow >= 1 && testRow <= 8 && testCol >= 1 && testCol <= 8) {
-                    ChessPosition newPosition = new ChessPosition(testRow, testCol);
-                    //Make Move on testBoard
-
-
-                    //check if target position is null or opponents piece
-//                    if(targetSpace == null || targetSpace.getTeamColor() != myPiece.getTeamColor()) {
-//                        ChessMove newMove = new ChessMove(myPosition, newPosition, null);
-//                        validMoves.add(newMove);
-//                    }
+                            if (piece != null && piece.getTeamColor() == teamColor){ //friendly pieces
+                                for(ChessMove validMove : piece.pieceMoves(testBoard, position)){
+                                    testBoard = new ChessBoard(board);
+                                    if (validMove.getEndPosition().equals(newPosition)){
+                                        testBoard.addPiece(validMove.getEndPosition(), piece);
+                                        testBoard.addPiece(validMove.getStartPosition(), null);
+                                        if(!isInCheck(teamColor, testBoard)){
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-
             }
-
         }
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**

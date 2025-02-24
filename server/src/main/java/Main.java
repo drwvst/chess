@@ -1,6 +1,6 @@
 import chess.*;
+
 import server.Server;
-//import org.eclipse.jetty.server.Server;
 
 
 public class Main {
@@ -9,14 +9,7 @@ public class Main {
         System.out.println("♕ 240 Chess Server: " + piece);
 
         Server server = new Server();
-        int port = 8080;
-        System.out.println("Starting server on port: " + port);
-        int actualPort = server.run(port);
+        server.run(8080);
 
-        if (actualPort == port) {
-            System.out.println("Server successfully started on port: " + actualPort);
-        } else {
-            System.err.println("Server started on a different port: " + actualPort);
-        }
     }
 }

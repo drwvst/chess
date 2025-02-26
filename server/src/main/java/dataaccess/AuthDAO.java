@@ -6,8 +6,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AuthDAO {
+    private static final AuthDAO instance = new AuthDAO();
     private final Map<String, AuthData> authTokens = new HashMap<>();
     //<AuthToken string, AuthData object>
+
+    private AuthDAO() {}  //private constructor to prevent external instantiation
+    public static AuthDAO getInstance() {
+        return instance;
+    }
 
     public AuthData createAuth(String username) {
         String token = UUID.randomUUID().toString();
@@ -27,5 +33,9 @@ public class AuthDAO {
         authTokens.remove(token);
     }
 
+
+    public void clear(){
+        authTokens.clear();
+    }
 
 }

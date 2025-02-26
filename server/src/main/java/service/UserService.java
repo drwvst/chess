@@ -36,12 +36,13 @@ public class UserService {
         return new RegisterResult(newUserData.username(), authData.authToken());
     }
 
+    public void logout(String token) throws DataAccessException {
+        if(authDAO.getAuthToken(token) == null){
+            throw new DataAccessException("Unauthorized");
+        }
+        authDAO.deleteAuth(token);
+    }
 
-
-
-    /*
-    public void logout(LogoutRequest logoutRequest) {}
-    */
 
 }
 

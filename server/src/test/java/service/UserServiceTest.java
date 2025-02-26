@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.ClearHandler;
+import dataaccess.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,6 +65,20 @@ public class UserServiceTest {
         LoginRequest request = new LoginRequest("bobgustusjr", "bobjr'sSecretPassword");
 
         assertThrows(DataAccessException.class, () -> userService.login(request));
+    }
+
+    @Test
+    void testPositiveLogout() throws DataAccessException{
+        RegisterRequest registerRequest = new RegisterRequest("bobgustus","bobsSecretPassword","bob@gmail.com");
+        RegisterResult result = userService.register(registerRequest);
+
+        assertDoesNotThrow(() -> userService.logout(result.authToken()));
+        assertThrows(DataAccessException.class, () -> AuthDAO.getInstance().getAuthToken(result.authToken()));
+    }
+
+    @Test
+    void testLogoutWithInvalidToken() {
+        assertThrows(DataAccessException.class, () -> userService.logout("quitePossiblyAnInvalidToken"));
     }
 
 }

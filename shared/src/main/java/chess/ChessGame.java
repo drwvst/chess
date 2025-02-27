@@ -237,19 +237,13 @@ public class ChessGame {
 
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
-                ChessPiece piece = getEnemyPiece(row, col, teamColor);
+                ChessPiece piece = getOpponentPiece(row, col, teamColor);
                 if (piece != null) {
                     addThreatMoves(threatPieces, piece, new ChessPosition(row, col), kingPosition);
                 }
             }
         }
         return threatPieces;
-    }
-
-    private ChessPiece getEnemyPiece(int row, int col, TeamColor teamColor) {
-        ChessPosition position = new ChessPosition(row, col);
-        ChessPiece piece = board.getPiece(position);
-        return (piece != null && piece.getTeamColor() != teamColor) ? piece : null;
     }
 
     private void addThreatMoves(List<ChessMove> threatPieces, ChessPiece piece, ChessPosition position, ChessPosition kingPosition) {
@@ -263,7 +257,9 @@ public class ChessGame {
     private boolean canBlockOrCaptureThreat(List<ChessMove> threatPieces, TeamColor teamColor) {
         for (ChessPosition position : getAllTeamPositions(teamColor)) {
             ChessPiece piece = board.getPiece(position);
-            if (piece == null) continue;
+            if (piece == null) {
+                continue;
+            }
 
             if (canPieceBlockOrCapture(piece, position, teamColor)) {
                 return true;

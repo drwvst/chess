@@ -15,6 +15,7 @@ public class Server {
         Spark.delete("/session", new LogoutHandler());
         Spark.get("/game", new ListGamesHandler());
         Spark.post("/game", new CreateGameHandler());
+        Spark.put("/game", new JoinGameHandler());
 
 
         Spark.awaitInitialization();

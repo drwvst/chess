@@ -27,7 +27,7 @@ public class LogoutHandler implements Route{
         }
     }
 
-    private record SuccessMessage() {}  // Empty JSON response `{}`
+    private record SuccessMessage() {}
 
     private record ErrorMessage(String message) {}
 }

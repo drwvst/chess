@@ -5,7 +5,6 @@ import model.*;
 import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.ClearHandler;
 import dataaccess.*;
 
 import static org.junit.jupiter.api.Assertions.*;

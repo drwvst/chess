@@ -200,7 +200,8 @@ public class ChessGame {
             List<ChessMove> threatPieces = new ArrayList<>();
 
 
-            for (ChessMove move : kingPiece.pieceMoves(board, kingPosition)){ //Chess move objects can be broken down into chess positions to make moves
+            for (ChessMove move : kingPiece.pieceMoves(board, kingPosition)){
+                //Chess move objects can be broken down into chess positions to make moves
                 testBoard = new ChessBoard(board);
 
                 //preform move on testboard
@@ -314,28 +315,6 @@ public class ChessGame {
         return board;
     }
 
-    /** use for debugging
-    public void printBoard(ChessBoard board) {
-        for (int row = 8; row >= 1; row--) {
-            System.out.print("|");
-            for (int col = 1; col <= 8; col++) {
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                if (piece != null) {
-                    char pieceChar = getPieceChar(piece);
-                    System.out.print(pieceChar);
-                } else {
-                    System.out.print(" ");
-                }
-                System.out.print("|");
-            }
-            System.out.println();
-        }
-        System.out.println("\n");
-    }
-
-
-    **/
-
     public ChessPosition findKing(TeamColor teamColor) {
         //finding the kings Position
         //printBoard(board);
@@ -352,21 +331,4 @@ public class ChessGame {
         }
         return kingPosition;
     }
-
-    // Helper method to determine the correct character for a piece
-    private char getPieceChar(ChessPiece piece) {
-        char pieceChar;
-        switch (piece.getPieceType()) {
-            case KING -> pieceChar = 'k';
-            case QUEEN -> pieceChar = 'q';
-            case ROOK -> pieceChar = 'r';
-            case BISHOP -> pieceChar = 'b';
-            case KNIGHT -> pieceChar = 'n';
-            case PAWN -> pieceChar = 'p';
-            default -> pieceChar = ' ';
-        }
-        // Convert to uppercase if it's a white piece
-        return piece.getTeamColor() == TeamColor.WHITE ? Character.toUpperCase(pieceChar) : pieceChar;
-    }
-
 }

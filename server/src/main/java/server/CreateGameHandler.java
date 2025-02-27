@@ -18,10 +18,10 @@ public class CreateGameHandler implements Route{
     public Object handle(Request request, Response response){
         try{
             String authToken = request.headers("authorization");
-            CreateGameRequest CGRequest = gson.fromJson(request.body(), CreateGameRequest.class);
-            CreateGameResult CGResult = new CreateGameResult(gameService.createGame(authToken, CGRequest.gameName()).gameID());
+            CreateGameRequest cgRequest = gson.fromJson(request.body(), CreateGameRequest.class);
+            CreateGameResult cgResult = new CreateGameResult(gameService.createGame(authToken, cgRequest.gameName()).gameID());
             response.status(200);
-            return gson.toJson(CGResult);
+            return gson.toJson(cgResult);
         } catch (Exception e){
             if(Objects.equals(e.getMessage(), "unauthorized")){
                 response.status(401);

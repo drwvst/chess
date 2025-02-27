@@ -5,14 +5,14 @@ import model.GameData;
 import java.util.*;
 
 public class GameDAO {
-    private static final GameDAO instance = new GameDAO();
+    private static final GameDAO INSTANCE = new GameDAO();
     private final Map<Integer, GameData> games = new HashMap<>();
     private int nextGameID = 1;
 
     private GameDAO() {}
 
     public static GameDAO getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public List<GameData> listGames() {

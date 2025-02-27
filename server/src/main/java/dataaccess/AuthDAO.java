@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AuthDAO {
-    private static final AuthDAO instance = new AuthDAO();
+    private static final AuthDAO INSTANCE = new AuthDAO();
     private final Map<String, AuthData> authTokens = new HashMap<>();
     //<AuthToken string, AuthData object>
 
     private AuthDAO() {}  //private constructor to prevent external instantiation
     public static AuthDAO getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public AuthData createAuth(String username) {

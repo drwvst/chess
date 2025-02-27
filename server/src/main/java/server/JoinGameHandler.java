@@ -18,8 +18,8 @@ public class JoinGameHandler implements Route{
     public Object handle(Request request, Response response){
         try{
             String authToken = request.headers("authorization");
-            JoinGameRequest JGRequest = gson.fromJson(request.body(), JoinGameRequest.class);
-            gameService.joinGame(authToken, JGRequest.gameID(), JGRequest.playerColor());
+            JoinGameRequest jgRequest = gson.fromJson(request.body(), JoinGameRequest.class);
+            gameService.joinGame(authToken, jgRequest.gameID(), jgRequest.playerColor());
             response.status(200);
             return gson.toJson(new SuccessMessage());
         } catch (Exception e) {

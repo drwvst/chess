@@ -24,7 +24,7 @@ public class AuthDAO {
 
     public AuthData getAuthToken(String token) throws DataAccessException {
         if(!authTokens.containsKey(token)) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("unauthorized");
         }
         return authTokens.get(token);
     }

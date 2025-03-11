@@ -69,4 +69,52 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    public static void initializeDatabase() {
+        try {
+            createDatabase();
+            createTables();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Database initialization failed: " + e.getMessage(), e);
+        }
+    }
+
+    public static void createTables(){
+        try(Connection conn = getConnection();
+            Statement stmt = conn.createStatement()){
+
+            //Users Table initialization
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS users (
+                    username VARCHAR(50) PRIMARY KEY,
+                    password_hash VARCHAR(255) NOT NULL
+                )
+            """);
+
+            //AuthTokens table
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS auth_tokens(
+                    token VARCHAR(100) PRIMARY KEY,
+                    username VARCHAR(50) NOT NULL,
+                    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                )
+            """);
+
+            //Games Table
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS games (
+                    game_id INT AUTO_INCREMENT PRIMARY KEY,
+                    white_player VARCHAR(50),
+                    black_player VARCHAR(50),
+                    game_state TEXT NOT NULL,
+                    FOREIGN KEY (white_player) REFERENCES users(username),
+                    FOREIGN KEY (black_player) REFERENCES users(username)
+                )
+            """);
+
+        } catch (SQLException | DataAccessException e){
+            throw new RuntimeException("Error creating tables: " + e.getMessage());
+        }
+    }
+
 }

@@ -1,10 +1,13 @@
 package server;
 
+import dataaccess.DatabaseManager;
 import spark.*;
 
 public class Server {
 
     public int run(int desiredPort) {
+        DatabaseManager.initializeDatabase();
+
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
 

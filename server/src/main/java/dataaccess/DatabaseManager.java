@@ -87,7 +87,8 @@ public class DatabaseManager {
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS users (
                     username VARCHAR(50) PRIMARY KEY,
-                    password_hash VARCHAR(255) NOT NULL
+                    password_hash VARCHAR(255) NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL
                 )
             """);
 
@@ -106,7 +107,8 @@ public class DatabaseManager {
                     game_id INT AUTO_INCREMENT PRIMARY KEY,
                     white_player VARCHAR(50),
                     black_player VARCHAR(50),
-                    game_state TEXT NOT NULL,
+                    game_name VARCHAR(50),
+                    chess_game TEXT NOT NULL,
                     FOREIGN KEY (white_player) REFERENCES users(username),
                     FOREIGN KEY (black_player) REFERENCES users(username)
                 )

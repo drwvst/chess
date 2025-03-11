@@ -1,4 +1,65 @@
 package dataaccess;
 
+import model.UserData;
+
+import javax.xml.crypto.Data;
+import java.sql.*;
+
 public class MySQLUserDAO {
+    private static final MySQLUserDAO INSTANCE = new MySQLUserDAO();
+
+    private MySQLUserDAO() {};
+
+    public static MySQLUserDAO getInstance(){
+        return INSTANCE;
+    }
+
+    public void createUser(UserData user) throws DataAccessException{
+        String sqlString = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+
+        try(Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sqlString)){
+
+            stmt.setString(1, user.username());
+            stmt.setString(2, user.password()); //MUST HASH PASSWORD LATER
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataAccessException("Username already taken");
+            }
+            throw new DataAccessException("Error inserting user: " + e.getMessage());
+        }
+    }
+
+    public UserData getUser(String username) throws DataAccessException{
+        String sqlString = "SELECT username, password_hash FROM users WHERE username = ?";
+        try(Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sqlString)){
+
+            stmt.setString(1, username);
+
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()){
+                return new UserData(rs.getString("username"), rs.getString("password_hash"),
+                        rs.getString("email"));
+            } else {
+                throw new DataAccessException("Unauthorized"); // User DNE so no access
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error retrieving user: " + e.getMessage());
+        }
+    }
+
+    public void clear() throws DataAccessException {
+        String sqlString = "DELETE FROM users";
+
+        try(Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sqlString)){
+
+            stmt.executeUpdate();
+        } catch (SQLException e){
+            throw new DataAccessException("Error clearing Users: " + e.getMessage());
+        }
+
+    }
 }

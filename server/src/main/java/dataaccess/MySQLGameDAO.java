@@ -11,7 +11,7 @@ import java.util.List;
 
 public class MySQLGameDAO {
     private static final MySQLGameDAO INSTANCE = new MySQLGameDAO();
-    private static final Gson gson = new GsonBuilder().create();
+    private static final Gson GSON = new GsonBuilder().create();
 
     private MySQLGameDAO() {}
 
@@ -39,7 +39,7 @@ public class MySQLGameDAO {
     public GameData createGame(String gameName) throws DataAccessException {
         String sql = "INSERT INTO games (game_name, chess_game) VALUES (?, ?)";
         ChessGame newGame = new ChessGame();
-        String gameStateJson = gson.toJson(newGame);
+        String gameStateJson = GSON.toJson(newGame);
         int gameID = -1;
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -81,7 +81,7 @@ public class MySQLGameDAO {
 
     public void updateGame(GameData game) throws DataAccessException {
         String sql = "UPDATE games SET white_player = ?, black_player = ?, chess_game = ? WHERE game_id = ?";
-        String gameStateJson = gson.toJson(game.game());
+        String gameStateJson = GSON.toJson(game.game());
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -107,7 +107,7 @@ public class MySQLGameDAO {
         String gameName = rs.getString("game_name");
         String gameStateJson = rs.getString("chess_game");
 
-        ChessGame gameState = gson.fromJson(gameStateJson, ChessGame.class);
+        ChessGame gameState = GSON.fromJson(gameStateJson, ChessGame.class);
         return new GameData(gameID, whitePlayer, blackPlayer, gameName, gameState);
     }
 }

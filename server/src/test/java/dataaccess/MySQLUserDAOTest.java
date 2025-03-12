@@ -14,7 +14,7 @@ class MySQLUserDAOTest {
     }
 
     @Test
-    void testCreateUser_Positive() throws DataAccessException {
+    void testCreateUserPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password123", "test@example.com");
         assertDoesNotThrow(() -> userDAO.createUser(user));
 
@@ -24,7 +24,7 @@ class MySQLUserDAOTest {
     }
 
     @Test
-    void testCreateUser_DuplicateUsername() throws DataAccessException {
+    void testCreateUserDuplicateUsername() throws DataAccessException {
         UserData user1 = new UserData("duplicateUser", "password123", "email1@example.com");
         UserData user2 = new UserData("duplicateUser", "password456", "email2@example.com");
 
@@ -33,7 +33,7 @@ class MySQLUserDAOTest {
     }
 
     @Test
-    void testGetUser_UserExists() throws DataAccessException {
+    void testGetUserUserExists() throws DataAccessException {
         UserData user = new UserData("existingUser", "securePass", "user@example.com");
         userDAO.createUser(user);
 
@@ -43,7 +43,7 @@ class MySQLUserDAOTest {
     }
 
     @Test
-    void testGetUser_UserNotFound() {
+    void testGetUserUserNotFound() {
         assertThrows(DataAccessException.class, () -> userDAO.getUser("nonExistentUser"));
     }
 }

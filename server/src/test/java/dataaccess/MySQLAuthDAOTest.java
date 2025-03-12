@@ -15,7 +15,7 @@ class MySQLAuthDAOTest {
     }
 
     @Test
-    void testCreateAuth_Positive() throws DataAccessException {
+    void testCreateAuthPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password123", "test@example.com");
         MySQLUserDAO.getInstance().createUser(user);
 
@@ -28,7 +28,7 @@ class MySQLAuthDAOTest {
     }
 
     @Test
-    void testGetAuthToken_ValidToken() throws DataAccessException {
+    void testGetAuthTokenValidToken() throws DataAccessException {
         UserData user = new UserData("validUser", "password123", "valid@example.com");
         MySQLUserDAO.getInstance().createUser(user);
 
@@ -40,12 +40,12 @@ class MySQLAuthDAOTest {
     }
 
     @Test
-    void testGetAuthToken_InvalidToken() {
+    void testGetAuthTokenInvalidToken() {
         assertThrows(DataAccessException.class, () -> authDAO.getAuthToken("invalidToken"));
     }
 
     @Test
-    void testDeleteAuth_Positive() throws DataAccessException {
+    void testDeleteAuthPositive() throws DataAccessException {
         UserData user = new UserData("deleteUser", "password123", "delete@example.com");
         MySQLUserDAO.getInstance().createUser(user);
 
@@ -57,7 +57,7 @@ class MySQLAuthDAOTest {
     }
 
     @Test
-    void testDeleteAuth_NonExistentToken() {
+    void testDeleteAuthNonExistentToken() {
         assertThrows(DataAccessException.class, () -> authDAO.deleteAuth("fakeToken"));
     }
 }

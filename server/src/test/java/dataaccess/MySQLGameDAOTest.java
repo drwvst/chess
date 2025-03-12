@@ -18,7 +18,7 @@ class MySQLGameDAOTest {
     }
 
     @Test
-    void testCreateGame_Success() throws DataAccessException {
+    void testCreateGamePositive() throws DataAccessException {
         GameData game = gameDAO.createGame("Chess Match");
         assertNotNull(game);
         assertEquals("Chess Match", game.gameName());
@@ -29,7 +29,7 @@ class MySQLGameDAOTest {
     }
 
     @Test
-    void testGetGame_ValidGameID() throws DataAccessException {
+    void testGetGameValidGameID() throws DataAccessException {
         GameData game = gameDAO.createGame("My Chess Game");
         GameData retrievedGame = gameDAO.getGame(game.gameID());
 
@@ -38,25 +38,25 @@ class MySQLGameDAOTest {
     }
 
     @Test
-    void testGetGame_InvalidGameID() {
+    void testGetGameInvalidGameID() {
         assertThrows(DataAccessException.class, () -> gameDAO.getGame(9999));
     }
-    
+
 
     @Test
-    void testUpdateGame_InvalidGameID() {
+    void testUpdateGameInvalidGameID() {
         GameData fakeGame = new GameData(9999, "FakeWhite", "FakeBlack", "Fake Game", new ChessGame());
         assertThrows(DataAccessException.class, () -> gameDAO.updateGame(fakeGame));
     }
 
     @Test
-    void testListGames_EmptyDatabase() throws DataAccessException {
+    void testListGamesEmptyDatabase() throws DataAccessException {
         List<GameData> games = gameDAO.listGames();
         assertTrue(games.isEmpty());
     }
 
     @Test
-    void testListGames_NonEmptyDatabase() throws DataAccessException {
+    void testListGamesNonEmptyDatabase() throws DataAccessException {
         gameDAO.createGame("Game1");
         gameDAO.createGame("Game2");
 

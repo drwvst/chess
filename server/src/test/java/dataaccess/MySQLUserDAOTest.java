@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MySQLUserDAOTest {
-    private static final MySQLUserDAO userDAO = MySQLUserDAO.getInstance();
+    private static final MySQLUserDAO USER_DAO = MySQLUserDAO.getInstance();
 
     @BeforeEach
     void setUp() throws DataAccessException {
@@ -16,9 +16,9 @@ class MySQLUserDAOTest {
     @Test
     void testCreateUserPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password123", "test@example.com");
-        assertDoesNotThrow(() -> userDAO.createUser(user));
+        assertDoesNotThrow(() -> USER_DAO.createUser(user));
 
-        UserData retrievedUser = userDAO.getUser("testUser");
+        UserData retrievedUser = USER_DAO.getUser("testUser");
         assertNotNull(retrievedUser);
         assertEquals("testUser", retrievedUser.username());
     }
@@ -28,22 +28,22 @@ class MySQLUserDAOTest {
         UserData user1 = new UserData("duplicateUser", "password123", "email1@example.com");
         UserData user2 = new UserData("duplicateUser", "password456", "email2@example.com");
 
-        userDAO.createUser(user1);
-        assertThrows(DataAccessException.class, () -> userDAO.createUser(user2));
+        USER_DAO.createUser(user1);
+        assertThrows(DataAccessException.class, () -> USER_DAO.createUser(user2));
     }
 
     @Test
     void testGetUserUserExists() throws DataAccessException {
         UserData user = new UserData("existingUser", "securePass", "user@example.com");
-        userDAO.createUser(user);
+        USER_DAO.createUser(user);
 
-        UserData retrievedUser = userDAO.getUser("existingUser");
+        UserData retrievedUser = USER_DAO.getUser("existingUser");
         assertEquals("existingUser", retrievedUser.username());
         assertEquals("securePass", retrievedUser.password());
     }
 
     @Test
     void testGetUserUserNotFound() {
-        assertThrows(DataAccessException.class, () -> userDAO.getUser("nonExistentUser"));
+        assertThrows(DataAccessException.class, () -> USER_DAO.getUser("nonExistentUser"));
     }
 }

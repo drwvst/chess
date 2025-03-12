@@ -30,7 +30,7 @@ public class MySQLAuthDAO {
     }
 
     public AuthData getAuthToken(String token) throws DataAccessException {
-        String sqlString = "SELECT token, username FROM auth_token WHERE token = ?";
+        String sqlString = "SELECT token, username FROM auth_tokens WHERE token = ?";
 
         try(Connection conn = DatabaseManager.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sqlString)){

@@ -72,6 +72,7 @@ public class DatabaseManager {
 
     public static void initializeDatabase() {
         try {
+            //clear();
             createDatabase();
             createTables();
         } catch (DataAccessException e) {
@@ -118,5 +119,30 @@ public class DatabaseManager {
             throw new RuntimeException("Error creating tables: " + e.getMessage());
         }
     }
+
+    public static void clear() throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Disable foreign key checks to avoid constraint violations
+            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
+
+            // Clear tables in the correct order
+            stmt.executeUpdate("DELETE FROM auth_tokens");
+            stmt.executeUpdate("DELETE FROM games");
+            stmt.executeUpdate("DELETE FROM users");
+
+            // Reset auto-increment values if needed
+            stmt.executeUpdate("ALTER TABLE users AUTO_INCREMENT = 1");
+            stmt.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
+
+            // Re-enable foreign key checks
+            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error clearing tables: " + e.getMessage());
+        }
+    }
+
 
 }

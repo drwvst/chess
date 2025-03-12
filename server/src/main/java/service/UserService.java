@@ -1,23 +1,23 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.UserDAO;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.*;
 
 public class UserService {
-    private final UserDAO userDAO = UserDAO.getInstance();
-    private final AuthDAO authDAO = AuthDAO.getInstance();
+//    private final UserDAO userDAO = UserDAO.getInstance();
+//    private final AuthDAO authDAO = AuthDAO.getInstance();
+    private final MySQLUserDAO mySQLUserDAO = MySQLUserDAO.getInstance();
+    private final MySQLAuthDAO mySQLAuthDAO = MySQLAuthDAO.getInstance();
 
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
-        UserData user = userDAO.getUser(loginRequest.username());
+        UserData user = mySQLUserDAO.getUser(loginRequest.username());
 
         if(!user.password().equals(loginRequest.password())) {
             throw new DataAccessException("Unauthorized");
         }
 
-        AuthData authData = authDAO.createAuth(loginRequest.username());
+        AuthData authData = mySQLAuthDAO.createAuth(loginRequest.username());
         return new LoginResult(authData.username(), authData.authToken());
     }
 
@@ -30,17 +30,17 @@ public class UserService {
 
         //create new user
         UserData newUserData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
-        userDAO.createUser(newUserData);
+        mySQLUserDAO.createUser(newUserData);
 
-        AuthData authData = authDAO.createAuth(newUserData.username());
+        AuthData authData = mySQLAuthDAO.createAuth(newUserData.username());
         return new RegisterResult(newUserData.username(), authData.authToken());
     }
 
     public void logout(String token) throws DataAccessException {
-        if(authDAO.getAuthToken(token) == null){
-            throw new DataAccessException("Unauthorized");
-        }
-        authDAO.deleteAuth(token);
+//        if(mySQLAuthDAO.getAuthToken(token) == null){
+//            throw new DataAccessException("Unauthorized");
+//        }
+        mySQLAuthDAO.deleteAuth(token);
     }
 
 

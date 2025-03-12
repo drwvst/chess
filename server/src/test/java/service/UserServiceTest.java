@@ -14,7 +14,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp(){
+    void setUp() throws DataAccessException {
         userService = new UserService();
         ClearService clearService = new ClearService();
         clearService.clear();

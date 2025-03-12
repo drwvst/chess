@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
 //    private final UserDAO userDAO = UserDAO.getInstance();
@@ -13,7 +14,7 @@ public class UserService {
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
         UserData user = mySQLUserDAO.getUser(loginRequest.username());
 
-        if(!user.password().equals(loginRequest.password())) {
+        if(!verifyPass(loginRequest.password(), user.password())) {
             throw new DataAccessException("unauthorized");
         }
 
@@ -29,7 +30,8 @@ public class UserService {
         }
 
         //create new user
-        UserData newUserData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        String hashedPassword = passHash(registerRequest.password());
+        UserData newUserData = new UserData(registerRequest.username(), hashedPassword, registerRequest.email());
         mySQLUserDAO.createUser(newUserData);
 
         AuthData authData = mySQLAuthDAO.createAuth(newUserData.username());
@@ -37,10 +39,14 @@ public class UserService {
     }
 
     public void logout(String token) throws DataAccessException {
-//        if(mySQLAuthDAO.getAuthToken(token) == null){
-//            throw new DataAccessException("Unauthorized");
-//        }
         mySQLAuthDAO.deleteAuth(token);
+    }
+
+    public String passHash(String clearTextPassword){
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
+    }
+    public boolean verifyPass(String clearTextPassword, String hashedPassword){
+        return BCrypt.checkpw(clearTextPassword, hashedPassword);
     }
 
 

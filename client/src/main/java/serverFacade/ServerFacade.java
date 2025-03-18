@@ -19,47 +19,50 @@ public class ServerFacade {
     /// Implement the web API calls here as listed on notes doc
     public AuthData login(String username, String password) throws ResponseException{
         var path = "/session";
-        return this.makeRequest("POST", path, new LoginRequest(username, password), AuthData.class);
+        return this.makeRequest("POST", path, new LoginRequest(username, password), AuthData.class, null);
     }
 
     public AuthData register(String username,String password, String email) throws ResponseException{
         var path = "/user";
-        return this.makeRequest("POST", path, new RegisterRequest(username, password, email), AuthData.class);
+        return this.makeRequest("POST", path, new RegisterRequest(username, password, email), AuthData.class, null);
     }
 
     public void clear() throws ResponseException{
         var path = "/db";
-        this.makeRequest("DELETE", path, null, null);
+        this.makeRequest("DELETE", path, null, null, null);
     }
 
-    public void logout() throws ResponseException {
-        var path = "/session";
-        makeRequest("DELETE", path, null, null);
+    public void logout(String authToken) throws ResponseException {
+        makeRequest("DELETE", "/session", null, null, authToken);
     }
 
     public GameData createGame(String authToken, String gameName) throws ResponseException{
         var path = "/game";
-        return this.makeRequest("POST", path, new CreateGameRequest(gameName), GameData.class);
+        return this.makeRequest("POST", path, new CreateGameRequest(gameName), GameData.class, authToken);
     }
 
     public List<GameData> listGames(String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, null, ListGamesResult.class).games();
+        return this.makeRequest("GET", path, null, ListGamesResult.class, authToken).games();
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws ResponseException{
         var path = "/game";
-        makeRequest("PUT", path, new JoinGameRequest(playerColor,gameID), null);
+        makeRequest("PUT", path, new JoinGameRequest(playerColor,gameID), null, authToken);
     }
 
 
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            if (authToken != null) {
+                http.setRequestProperty("Authorization", authToken);
+            }
 
             writeBody(request, http);
             http.connect();

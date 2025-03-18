@@ -92,8 +92,33 @@ public class ServerFacadeTests {
     }
 
     //logout positive
+    @Test
+    void logoutPositive() throws Exception {
+        AuthData auth = facade.register(
+                "bobAndDefinitleyNotBatman",
+                "IOnlyWearBlack",
+                "notBatman@email.com");
+        assertNotNull(auth);
+        assertNotNull(auth.authToken());
+
+        facade.logout(auth.authToken());
+        assertThrows(ResponseException.class, () -> facade.listGames(auth.authToken()));
+    }
 
     //logout negative
+    @Test
+    void logoutMissingInfo() throws Exception {
+        facade.register("bobAndDefinitleyNotBatman", "IOnlyWearBlack", "bob@mail");
+        assertThrows(ResponseException.class,
+                () -> facade.logout(""));
+    }
+
+    @Test
+    void logoutUserDne() throws Exception {
+        assertThrows(ResponseException.class,
+                () -> facade.logout("invalidAuth"));
+    }
+
 
     //createGame positive
 

@@ -1,6 +1,5 @@
 package client;
 
-import dataaccess.DataAccessException;
 import exception.ResponseException;
 import model.AuthData;
 import org.junit.jupiter.api.*;
@@ -74,8 +73,23 @@ public class ServerFacadeTests {
     }
 
     //clear positive
+    @Test
+    void clearPositive() throws Exception{
+        facade.register("bobAndDefinitleyNotBatman", "IOnlyWearBlack", "notBatman@email.com");
+        AuthData auth = facade.login("bobAndDefinitleyNotBatman", "IOnlyWearBlack");
+        assertNotNull(auth);
+
+        facade.clear();
+
+        assertThrows(ResponseException.class,
+                () -> facade.login("bobAndDefinitleyNotBatman", "IOnlyWearBlack"));
+    }
 
     //clear negative
+    @Test
+    void clearNegative(){
+        assertDoesNotThrow(() -> facade.clear());
+    }
 
     //logout positive
 

@@ -2,6 +2,7 @@ package client;
 
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverFacade.ServerFacade;
@@ -50,7 +51,7 @@ public class ServerFacadeTests {
     //login negative
     @Test
     void loginNegative() throws Exception{
-        assertThrows(ResponseException.class, () -> facade.login("bobert", "letmein"));
+        assertThrows(ResponseException.class, () -> facade.login("bobert", "LetMeIn"));
     }
 
     //register positive
@@ -121,8 +122,53 @@ public class ServerFacadeTests {
 
 
     //createGame positive
+    @Test
+    void createGamePositive() throws Exception{
+        AuthData auth = facade.register(
+                "bobButLikeMaybeBatman", "lobsterThermidor", "batBob@batmail.com");
+        GameData gameData = facade.createGame(auth.authToken(), "BobsBatGame");
+        assertEquals(1, gameData.gameID());
+        assertNull(gameData.whiteUsername());
+        assertNull(gameData.blackUsername());
+    }
+
+    @Test
+    void createGameMultipleGames() throws Exception{
+        AuthData auth = facade.register(
+                "bobButLikeMaybeBatman", "lobsterThermidor", "batBob@batmail.com");
+        GameData gameData = facade.createGame(auth.authToken(), "BobsBatGame");
+        assertEquals(1, gameData.gameID());
+        GameData gameData2 = facade.createGame(auth.authToken(), "Bobs Second BatGame");
+        assertEquals(2, gameData2.gameID());
+        assertNull(gameData.whiteUsername());
+        assertNull(gameData.blackUsername());
+    }
 
     //createGame Negative
+    @Test
+    void createGameNoGameName() throws Exception {
+        AuthData auth = facade.register(
+                "IThinkIAmBatman", "megaLobsterThermidor", "batBob@batmail.com");
+        assertThrows(ResponseException.class,
+                () -> facade.createGame(auth.authToken(), ""));
+    }
+
+    @Test
+    void createGameNameAlreadyExists() throws Exception {
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        facade.createGame(auth.authToken(), "BatGame");
+        assertThrows(ResponseException.class,
+                () -> facade.createGame(auth.authToken(), "BatGame"));
+    }
+
+    @Test
+    void createGameInvalidAuth() throws Exception {
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        assertThrows(ResponseException.class,
+                () -> facade.createGame("Huzzah!", "BatGame"));
+    }
 
     //listGames positive
 

@@ -37,28 +37,42 @@ public class MySQLGameDAO {
     }
 
     public GameData createGame(String gameName) throws DataAccessException {
-        String sql = "INSERT INTO games (game_name, chess_game) VALUES (?, ?)";
+        String checkSql = "SELECT COUNT(*) FROM games WHERE game_name = ?";
+        String insertSql = "INSERT INTO games (game_name, chess_game) VALUES (?, ?)";
         ChessGame newGame = new ChessGame();
         String gameStateJson = GSON.toJson(newGame);
         int gameID = -1;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            //Checking if game name already exists
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, gameName);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new DataAccessException("Game with name '" + gameName + "' already exists.");
+                    }
+                }
+            }
 
-            stmt.setString(1, gameName);
-            stmt.setString(2, gameStateJson);
-            stmt.executeUpdate();
+            //Insert new game if name not already taken
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                insertStmt.setString(1, gameName);
+                insertStmt.setString(2, gameStateJson);
+                insertStmt.executeUpdate();
 
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    gameID = rs.getInt(1);
+                try (ResultSet rs = insertStmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        gameID = rs.getInt(1);
+                    }
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error creating game: " + e.getMessage());
         }
+
         return new GameData(gameID, null, null, gameName, newGame);
     }
+
 
 
     public GameData getGame(int gameID) throws DataAccessException {

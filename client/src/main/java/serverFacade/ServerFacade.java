@@ -1,4 +1,4 @@
-
+package serverFacade;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
@@ -29,12 +29,12 @@ public class ServerFacade {
 
     public void clear() throws ResponseException{
         var path = "/db";
-        this.makeRequest("DELETE", path, null, Void.class);
+        this.makeRequest("DELETE", path, null, null);
     }
 
     public void logout() throws ResponseException {
         var path = "/session";
-        makeRequest("DELETE", path, null, Void.class);
+        makeRequest("DELETE", path, null, null);
     }
 
     public GameData createGame(String authToken, String gameName) throws ResponseException{
@@ -49,7 +49,7 @@ public class ServerFacade {
 
     public void joinGame(String authToken, int gameID, String playerColor) throws ResponseException{
         var path = "/game";
-        makeRequest("PUT", path, new JoinGameRequest(playerColor,gameID), Void.class);
+        makeRequest("PUT", path, new JoinGameRequest(playerColor,gameID), null);
     }
 
 

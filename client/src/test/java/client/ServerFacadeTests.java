@@ -216,7 +216,7 @@ public class ServerFacadeTests {
         facade.createGame(auth.authToken(), "BatmanLivesHere");
         facade.createGame(auth.authToken(), "BatCave");
         List<GameData> gameData = facade.listGames(auth.authToken());
-        assertEquals(0, gameData.size());
+        assertEquals(4, gameData.size());
     }
 
     //listGames negative
@@ -230,11 +230,30 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.listGames(""));
     }
 
-
-
-
     //joinGame positive
+    @Test
+    void joinGamePositive() throws Exception{
+        AuthData authP1 = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        facade.createGame(authP1.authToken(), "BatGame");
+        facade.createGame(authP1.authToken(), "BatmansSecondGame");
+        facade.joinGame(authP1.authToken(),2, "white");
+
+        AuthData authP2 = facade.register(
+                "BatmansHomie", "hahaGoodPassword", "IKnowBatman@gmail");
+        facade.joinGame(authP2.authToken(),2, "black");
+
+        List<GameData> gameDataList = facade.listGames(authP1.authToken());
+        assertEquals("IAmBatman", gameDataList.get(1).whiteUsername());
+        assertEquals("BatmansHomie", gameDataList.get(1).blackUsername());
+    }
 
     //joinGame negative
-
+    @Test
+    void joinGameDne() throws Exception{
+        AuthData authP1 = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        assertThrows(ResponseException.class,
+                () -> facade.joinGame(authP1.authToken(),1, "white"));
+    }
 }

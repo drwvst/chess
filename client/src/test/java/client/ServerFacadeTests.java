@@ -7,6 +7,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import serverFacade.ServerFacade;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -171,8 +173,65 @@ public class ServerFacadeTests {
     }
 
     //listGames positive
+    @Test
+    void listGamesOnePositive() throws Exception{
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        facade.createGame(auth.authToken(), "BatGame");
+        List<GameData> gameData = facade.listGames(auth.authToken());
+        assertEquals(1, gameData.size());
+    }
+
+    @Test
+    void listGamesMultipleGamesPositive() throws Exception{
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        GameData gameData = facade.createGame(auth.authToken(), "BatGame");
+        GameData gameData2 = facade.createGame(auth.authToken(), "BatGameButDarkAndBrooding");
+        GameData gameData3 = facade.createGame(auth.authToken(), "BatmanLivesHere");
+        GameData gameData4 = facade.createGame(auth.authToken(), "BatCave");
+        List<GameData> gameList = facade.listGames(auth.authToken());
+        assertEquals(4, gameList.size());
+        assertEquals(1, gameData.gameID());
+        assertEquals(2, gameData2.gameID());
+        assertEquals(3, gameData3.gameID());
+        assertEquals(4, gameData4.gameID());
+
+    }
+
+    @Test
+    void listGamesNoGamesPositive() throws Exception{
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        List<GameData> gameData = facade.listGames(auth.authToken());
+        assertEquals(0, gameData.size());
+    }
+
+    @Test
+    void listGamesProperGameIds() throws Exception {
+        AuthData auth = facade.register(
+                "IAmBatman", "alfredTheButtlerWithTwoTs", "batBob@batmail.com");
+        facade.createGame(auth.authToken(), "BatGame");
+        facade.createGame(auth.authToken(), "BatGameButDarkAndBrooding");
+        facade.createGame(auth.authToken(), "BatmanLivesHere");
+        facade.createGame(auth.authToken(), "BatCave");
+        List<GameData> gameData = facade.listGames(auth.authToken());
+        assertEquals(0, gameData.size());
+    }
 
     //listGames negative
+    @Test
+    void listGamesInvalidAuth() throws Exception{
+        assertThrows(ResponseException.class, () -> facade.listGames("sneakyAuth"));
+    }
+
+    @Test
+    void listGamesNoAuth() throws Exception{
+        assertThrows(ResponseException.class, () -> facade.listGames(""));
+    }
+
+
+
 
     //joinGame positive
 

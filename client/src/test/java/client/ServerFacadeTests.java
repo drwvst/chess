@@ -61,7 +61,17 @@ public class ServerFacadeTests {
         assertTrue(authData.authToken().length() > 10);
     }
     //register negative
-
+    @Test
+    void registerMissingInformation() throws Exception{
+        assertThrows(ResponseException.class,
+                () -> facade.register("bobatman", "", "bob@email.com"));
+    }
+    @Test
+    void registerDuplicateUser() throws Exception{
+        facade.register("bobatman", "IDontHaveParents", "bob@email.com");
+        assertThrows(ResponseException.class,
+                () -> facade.register("bobatman", "IDontHaveParents", "bob@email.com"));
+    }
 
     //clear positive
 

@@ -22,7 +22,7 @@ public class UserService {
         return new LoginResult(authData.username(), authData.authToken());
     }
 
-    public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException{
+    public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         //validate
         if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null ||
                 registerRequest.username().isBlank() || registerRequest.password().isBlank() || registerRequest.email().isBlank()) {

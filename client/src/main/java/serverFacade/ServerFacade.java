@@ -7,6 +7,7 @@ import model.*;
 import java.io.*;
 import java.net.*;
 import java.util.List;
+import java.util.Map;
 
 public class ServerFacade {
 
@@ -55,7 +56,10 @@ public class ServerFacade {
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
-            URL url = (new URI(serverUrl + path)).toURL();
+            String fullUrl = serverUrl + path;
+            // System.out.println("Attempting request to: " + fullUrl);
+
+            URL url = (new URI(fullUrl)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
@@ -71,9 +75,10 @@ public class ServerFacade {
         } catch (ResponseException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(500, "Failed to connect: " + ex.getMessage());
         }
     }
+
 
 
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
@@ -88,7 +93,9 @@ public class ServerFacade {
 
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
+
         if (!isSuccessful(status)) {
+            // Read error response body
             try (InputStream respErr = http.getErrorStream()) {
                 if (respErr != null) {
                     throw ResponseException.fromJson(respErr);

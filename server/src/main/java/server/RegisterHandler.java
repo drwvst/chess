@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import model.*;
 import service.UserService;
 import spark.Request;
@@ -21,7 +23,8 @@ public class RegisterHandler implements Route{
 
             result.status(200);
             return gson.toJson(registerResult);
-        } catch (Exception e){
+
+        } catch (DataAccessException e ){
             if(Objects.equals(e.getMessage(), "Username already taken")){
                 result.status(403);
                 return gson.toJson(new RegisterHandler.ErrorMessage("Error: " + e.getMessage()));
@@ -30,5 +33,6 @@ public class RegisterHandler implements Route{
             return gson.toJson(new RegisterHandler.ErrorMessage("Error: " + e.getMessage()));
         }
     }
+
     private record ErrorMessage(String message) {}
 }

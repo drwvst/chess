@@ -21,7 +21,7 @@ public class Repl {
             String line = scanner.nextLine();
 
             try{
-                //result = client.eval(line);
+                result = client.eval(line);
                 System.out.println(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e){
                 var msg = e.toString();

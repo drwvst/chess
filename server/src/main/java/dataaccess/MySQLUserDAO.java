@@ -14,19 +14,27 @@ public class MySQLUserDAO {
     }
 
     public void createUser(UserData user) throws DataAccessException{
-        String sqlString = "INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)";
+        String checkUserSql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        String insertUserSql = "INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)";
 
-        try(Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sqlString)){
-
-            stmt.setString(1, user.username());
-            stmt.setString(2, user.password());
-            stmt.setString(3, user.email()); //MUST HASH PASSWORD LATER
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            if (e.getMessage().contains("Duplicate entry")) {
-                throw new DataAccessException("Username already taken");
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkUserSql)) {
+                checkStmt.setString(1, user.username());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new DataAccessException("Username already taken");
+                    }
+                }
             }
+
+            //Inserts the new user if it doesn't already exist
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertUserSql)) {
+                insertStmt.setString(1, user.username());
+                insertStmt.setString(2, user.password());
+                insertStmt.setString(3, user.email());
+                insertStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
             throw new DataAccessException("Error inserting user: " + e.getMessage());
         }
     }

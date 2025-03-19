@@ -1,8 +1,6 @@
 package ui;
 
-
 import java.util.Scanner;
-
 import static ui.EscapeSequences.*;
 
 public class Repl {
@@ -14,7 +12,7 @@ public class Repl {
 
     public void run() {
         System.out.println(SET_TEXT_COLOR_WHITE + WHITE_KING + "Welcome to Chess. Type Help to get started." + WHITE_KING);
-        //System.out.print(client.help());
+        System.out.print(SET_TEXT_COLOR_BLUE + client.help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -34,7 +32,7 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" +  ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR +  ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
 }

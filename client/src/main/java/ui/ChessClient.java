@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 
 public class ChessClient {
+    public AuthData currentUser;
     //private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
@@ -26,11 +27,11 @@ public class ChessClient {
 
             return switch (command){
                 case "register" -> register(parameters);
-//                case "login" -> login(parameters);
-//                case "creategame" -> createGame(parameters);
-//                case "listgames" -> listGames(parameters);
-//                case "joingame" -> joinGame(parameters);
-//                case "logout" -> logout(parameters);
+                case "login" -> login(parameters);
+//                case "creategame" -> createGame(parameters); //(needs Authtoken)
+//                case "listgames" -> listGames(parameters); //(needs Authtoken)
+//                case "joingame" -> joinGame(parameters); //(needs Authtoken)
+//                case "logout" -> logout(parameters); //(needs Authtoken)
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -41,17 +42,30 @@ public class ChessClient {
 
     public String register(String... parameters) throws ResponseException {
         if (parameters.length != 3) {
-            throw new ResponseException(400, "Expected: register <username> <password> <email>");
+            throw new ResponseException(400, "Expected: <username> <password> <email>");
         }
 
         var username = parameters[0];
         var password = parameters[1];
         var email = parameters[2];
 
-        server.register(username, password, email);
+        currentUser = server.register(username, password, email);
         state = State.SIGNEDIN;
 
         return String.format("Congratulations! You are successfully registered and signed in as %s", username);
+    }
+
+    public String login(String... params) throws ResponseException {
+        if (params.length != 2) {
+            throw new ResponseException(400, "Expected: <username> <password>");
+        }
+        var username = params[0];
+        var password = params[1];
+
+        currentUser = server.login(username,password);
+        state = State.SIGNEDIN;
+
+        return String.format("Successfully logged in as %s!", username);
     }
 
 
@@ -62,13 +76,14 @@ public class ChessClient {
             return """
                     - register <username> <password> <email>
                     - login <username> <password>
+                    - help
                     - quit
                     """;
         }
         return """
-                - createGame <authentication token> <game name>
-                - listGames  <authenication token>
-                - joinGame <authenication token> <gameID> <playerColor>
+                - createGame <game name>
+                - listGames
+                - joinGame <gameID> <playerColor>
                 - Logout <authentication token>
                 - Help
                 """;

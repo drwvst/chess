@@ -24,7 +24,7 @@ public class Repl {
                 result = client.eval(line);
                 System.out.println(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e){
-                var msg = e.toString();
+                var msg = e.getMessage();
                 System.out.print(msg);
             }
         }

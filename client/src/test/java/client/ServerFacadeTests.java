@@ -44,8 +44,7 @@ public class ServerFacadeTests {
     //login positive
     @Test
     void loginPositive() throws Exception{
-        facade.register("bob", "bobisactuallybatman", "bob@example.com");
-        var authData = facade.login("bob", "bobisactuallybatman");
+        var authData = facade.register("bob", "bobisactuallybatman", "bob@example.com");
         assertNotNull(authData);
         assertTrue(authData.authToken().length() > 10);
     }
@@ -78,8 +77,7 @@ public class ServerFacadeTests {
     //clear positive
     @Test
     void clearPositive() throws Exception{
-        facade.register("bobAndDefinitleyNotBatman", "IOnlyWearBlack", "notBatman@email.com");
-        AuthData auth = facade.login("bobAndDefinitleyNotBatman", "IOnlyWearBlack");
+        AuthData auth = facade.register("bobAndDefinitleyNotBatman", "IOnlyWearBlack", "notBatman@email.com");
         assertNotNull(auth);
 
         facade.clear();

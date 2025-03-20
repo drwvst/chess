@@ -39,7 +39,7 @@ public class ChessClient {
                 return switch (command){
                 case "creategame" -> createGame(parameters);
                 case "listgames" -> listGames(parameters);
-//                case "joingame" -> joinGame(parameters);
+                case "joingame" -> joinGame(parameters);
 //                case "logout" -> logout(parameters);
                     case "quit" -> "quit";
                     default -> help();
@@ -92,7 +92,7 @@ public class ChessClient {
         }
         var gameName = params[0];
 
-        activeChessGame = server.createGame(currentUser.authToken(), gameName);
+        server.createGame(currentUser.authToken(), gameName);
 
         return String.format(SET_TEXT_COLOR_GREEN + "Game created successfully: %s\n\n%s", gameName,help());
     }
@@ -106,7 +106,7 @@ public class ChessClient {
         List<GameData> gameDataList = server.listGames(currentUser.authToken());
         if(gameDataList.isEmpty()){
             return String.format(SET_TEXT_COLOR_RED + SET_TEXT_BOLD +
-                    "There are currently no active games! \n\n%s" + RESET_TEXT_BOLD_FAINT, help());
+                    "There are currently no active games! \n\n" + RESET_TEXT_BOLD_FAINT + "%s", help());
         }
 
         StringBuilder outputList = new StringBuilder();
@@ -131,6 +131,20 @@ public class ChessClient {
 
         return String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + WHITE_KING + "Games" +
                 WHITE_KING + "\n%s", outputList);
+    }
+
+    public String joinGame(String... params) throws ResponseException{
+        if (params.length != 2) {
+            throw new ResponseException(400, "Expected: <gameID> <playerColor>");
+        }
+
+        int gameID = Integer.parseInt(params[0]);
+        var playerColor = params[1];
+
+        server.joinGame(currentUser.authToken(), gameID, playerColor);
+        state = State.GAMESTATE;
+        return String.format("Game %d joined successfully!", gameID);
+        //game happens here?
     }
 
 

@@ -27,6 +27,7 @@ public class ServerFacadeTests {
 
     @AfterAll
     static void stopServer() throws Exception{
+        facade.clear();
         server.stop();
     }
 

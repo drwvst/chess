@@ -32,22 +32,22 @@ public class ChessClient {
                 return switch (command){
                     case "register" -> register(parameters);
                     case "login" -> login(parameters);
-                    case "quit" -> "quit";
+                    case "quit" -> quit();
                     default -> help();
                 };
             } else if (state == State.SIGNEDIN){
                 return switch (command){
-                case "creategame" -> createGame(parameters);
-                case "listgames" -> listGames(parameters);
-                case "joingame" -> joinGame(parameters);
-//                case "logout" -> logout(parameters);
-                    case "quit" -> "quit";
+                    case "creategame" -> createGame(parameters);
+                    case "listgames" -> listGames(parameters);
+                    case "joingame" -> joinGame(parameters);
+                    case "logout" -> logout(parameters);
+                    case "quit" -> quit();
                     default -> help();
                 };
             } else { //in GAMESTATE
                 return switch (command){
                     case "help" -> "you are in Gamestate";
-                    case "quit" -> "quit";
+                    //case "quitgame" -> quitGame();
                     default -> help();
                 };
             }
@@ -134,6 +134,7 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ResponseException{
+        assertSignedIn();
         if (params.length != 2) {
             throw new ResponseException(400, "Expected: <gameID> <playerColor>");
         }
@@ -147,6 +148,17 @@ public class ChessClient {
         //game happens here?
     }
 
+    public String logout(String... params) throws ResponseException{
+        assertSignedIn();
+        if (params.length != 0) {
+            throw new ResponseException(400, "To logout, simply type 'logout'");
+        }
+
+        server.logout(currentUser.authToken());
+        state = State.SIGNEDOUT;
+        return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out!\n\n%s", help());
+    }
+
 
 
 
@@ -158,15 +170,33 @@ public class ChessClient {
                     - Help
                     - Quit
                     """;
-        }
-        return SET_TEXT_COLOR_BLUE + """
+        } else if(state == State.SIGNEDIN){
+            return SET_TEXT_COLOR_BLUE + """
                 - CreateGame <game name>
                 - ListGames
                 - JoinGame <gameID> <playerColor>
                 - Logout <authentication token>
                 - Help
+                - Quit
                 """;
+        } else { //GAMESTATE
+            return SET_TEXT_COLOR_BLUE + """
+                    - quitGame
+                    - Help
+                    """;
+        }
     }
+
+    public String quit() throws ResponseException {
+        if (state == State.SIGNEDIN) {
+            server.logout(currentUser.authToken());
+            state = State.SIGNEDOUT;
+            System.out.println(SET_TEXT_COLOR_GREEN + "You have been logged out. Goodbye!");
+            return "quit";
+        }
+        return "quit";
+    }
+
 
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {

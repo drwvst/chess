@@ -6,6 +6,7 @@ import serverFacade.ServerFacade;
 import static ui.EscapeSequences.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 public class ChessClient {
@@ -34,17 +35,22 @@ public class ChessClient {
                     case "quit" -> "quit";
                     default -> help();
                 };
-            } else {
+            } else if (state == State.SIGNEDIN){
                 return switch (command){
-                case "creategame" -> createGame(parameters); //(needs Authtoken)
-//                case "listgames" -> listGames(parameters); //(needs Authtoken)
-//                case "joingame" -> joinGame(parameters); //(needs Authtoken)
-//                case "logout" -> logout(parameters); //(needs Authtoken)
+                case "creategame" -> createGame(parameters);
+                case "listgames" -> listGames(parameters);
+//                case "joingame" -> joinGame(parameters);
+//                case "logout" -> logout(parameters);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            } else { //in GAMESTATE
+                return switch (command){
+                    case "help" -> "you are in Gamestate";
                     case "quit" -> "quit";
                     default -> help();
                 };
             }
-
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
@@ -62,8 +68,8 @@ public class ChessClient {
         currentUser = server.register(username, password, email);
         state = State.SIGNEDIN;
 
-        return String.format(
-                "Congratulations! You are successfully registered and signed in as %s\n%s", username, help());
+        return String.format(SET_TEXT_COLOR_GREEN + "Congratulations! You are successfully " +
+                "registered and signed in as %s\n%s", username, help());
     }
 
     public String login(String... params) throws ResponseException {
@@ -76,7 +82,7 @@ public class ChessClient {
         currentUser = server.login(username,password);
         state = State.SIGNEDIN;
 
-        return String.format("Successfully logged in as %s!\n%s", username, help());
+        return String.format(SET_TEXT_COLOR_GREEN + "Successfully logged in as %s!\n%s", username, help());
     }
 
     public String createGame(String... params) throws ResponseException{
@@ -89,6 +95,42 @@ public class ChessClient {
         activeChessGame = server.createGame(currentUser.authToken(), gameName);
 
         return String.format(SET_TEXT_COLOR_GREEN + "Game created successfully: %s\n\n%s", gameName,help());
+    }
+
+    public String listGames(String... params) throws ResponseException{
+        assertSignedIn();
+        if (params.length != 0) {
+            throw new ResponseException(400, "To list active games, simply type 'Listgames'");
+        }
+
+        List<GameData> gameDataList = server.listGames(currentUser.authToken());
+        if(gameDataList.isEmpty()){
+            return String.format(SET_TEXT_COLOR_RED + SET_TEXT_BOLD +
+                    "There are currently no active games! \n\n%s" + RESET_TEXT_BOLD_FAINT, help());
+        }
+
+        StringBuilder outputList = new StringBuilder();
+        for(GameData data : gameDataList){
+            var whitePlayerString = (data.whiteUsername() == null) ?
+                    SET_TEXT_COLOR_GREEN + "White player available!" : SET_TEXT_COLOR_LIGHT_GREY + data.whiteUsername();
+            var blackPlayerString = (data.blackUsername() == null) ?
+                    SET_TEXT_COLOR_GREEN + "Black player available!" : SET_TEXT_COLOR_LIGHT_GREY + data.blackUsername();
+
+            if(data.whiteUsername() != null && data.blackUsername() != null){
+                outputList.append(String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "%d) %s" +
+                        FUN_RIGHT_ARROW + "\n" + SET_TEXT_COLOR_LIGHT_GREY + RESET_TEXT_BOLD_FAINT +
+                        "    White Player: " + whitePlayerString +
+                        "\n    Black Player: " + blackPlayerString + "\n", data.gameID(), data.gameName()));
+            }
+
+            outputList.append(String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "%d) %s" +
+                    FUN_RIGHT_ARROW + "\n" + SET_TEXT_COLOR_WHITE + RESET_TEXT_BOLD_FAINT +
+                    "    White Player: " + whitePlayerString + SET_TEXT_COLOR_WHITE +
+                    "\n    Black Player: " + blackPlayerString + "\n", data.gameID(), data.gameName()));
+        }
+
+        return String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + WHITE_KING + "Games" +
+                WHITE_KING + "\n%s", outputList);
     }
 
 

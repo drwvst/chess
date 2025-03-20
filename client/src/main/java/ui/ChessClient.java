@@ -25,16 +25,24 @@ public class ChessClient {
             var command = (tokens.length > 0) ? tokens[0] : "help";
             var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-            return switch (command){
-                case "register" -> register(parameters);
-                case "login" -> login(parameters);
+            if (state == State.SIGNEDOUT){
+                return switch (command){
+                    case "register" -> register(parameters);
+                    case "login" -> login(parameters);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            } else {
+                return switch (command){
 //                case "creategame" -> createGame(parameters); //(needs Authtoken)
 //                case "listgames" -> listGames(parameters); //(needs Authtoken)
 //                case "joingame" -> joinGame(parameters); //(needs Authtoken)
 //                case "logout" -> logout(parameters); //(needs Authtoken)
-                case "quit" -> "quit";
-                default -> help();
-            };
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            }
+
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
@@ -52,7 +60,8 @@ public class ChessClient {
         currentUser = server.register(username, password, email);
         state = State.SIGNEDIN;
 
-        return String.format("Congratulations! You are successfully registered and signed in as %s", username);
+        return String.format(
+                "Congratulations! You are successfully registered and signed in as %s\n%s", username, help());
     }
 
     public String login(String... params) throws ResponseException {
@@ -65,7 +74,7 @@ public class ChessClient {
         currentUser = server.login(username,password);
         state = State.SIGNEDIN;
 
-        return String.format("Successfully logged in as %s!", username);
+        return String.format("Successfully logged in as %s!\n%s", username, help());
     }
 
 
@@ -74,16 +83,16 @@ public class ChessClient {
     public String help() {
         if (state == State.SIGNEDOUT){
             return """
-                    - register <username> <password> <email>
-                    - login <username> <password>
-                    - help
-                    - quit
+                    - Register <username> <password> <email>
+                    - Login <username> <password>
+                    - Help
+                    - Quit
                     """;
         }
         return """
-                - createGame <game name>
-                - listGames
-                - joinGame <gameID> <playerColor>
+                - CreateGame <game name>
+                - ListGames
+                - JoinGame <gameID> <playerColor>
                 - Logout <authentication token>
                 - Help
                 """;

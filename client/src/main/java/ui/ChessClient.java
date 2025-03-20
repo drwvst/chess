@@ -3,12 +3,14 @@ package ui;
 import model.*;
 import exception.ResponseException;
 import serverFacade.ServerFacade;
+import static ui.EscapeSequences.*;
 
 import java.util.Arrays;
 
 
 public class ChessClient {
     public AuthData currentUser;
+    public GameData activeChessGame;
     //private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
@@ -34,7 +36,7 @@ public class ChessClient {
                 };
             } else {
                 return switch (command){
-//                case "creategame" -> createGame(parameters); //(needs Authtoken)
+                case "creategame" -> createGame(parameters); //(needs Authtoken)
 //                case "listgames" -> listGames(parameters); //(needs Authtoken)
 //                case "joingame" -> joinGame(parameters); //(needs Authtoken)
 //                case "logout" -> logout(parameters); //(needs Authtoken)
@@ -77,19 +79,31 @@ public class ChessClient {
         return String.format("Successfully logged in as %s!\n%s", username, help());
     }
 
+    public String createGame(String... params) throws ResponseException{
+        assertSignedIn();
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: <game name>");
+        }
+        var gameName = params[0];
+
+        activeChessGame = server.createGame(currentUser.authToken(), gameName);
+
+        return String.format(SET_TEXT_COLOR_GREEN + "Game created successfully: %s\n\n%s", gameName,help());
+    }
+
 
 
 
     public String help() {
         if (state == State.SIGNEDOUT){
-            return """
+            return SET_TEXT_COLOR_BLUE + """
                     - Register <username> <password> <email>
                     - Login <username> <password>
                     - Help
                     - Quit
                     """;
         }
-        return """
+        return SET_TEXT_COLOR_BLUE + """
                 - CreateGame <game name>
                 - ListGames
                 - JoinGame <gameID> <playerColor>

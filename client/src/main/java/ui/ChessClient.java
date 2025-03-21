@@ -13,7 +13,7 @@ import static ui.EscapeSequences.*;
 
 public class ChessClient {
     public AuthData currentUser;
-    public ChessGame activeChessGame;
+    public GameData activeChessGameData;
     //private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
@@ -42,14 +42,19 @@ public class ChessClient {
                     case "creategame" -> createGame(parameters);
                     case "listgames" -> listGames(parameters);
                     case "joingame" -> joinGame(parameters);
+                    case "observegame" -> observeGame(parameters);
                     case "logout" -> logout(parameters);
                     case "quit" -> quit();
                     default -> help();
                 };
+            } else if(state == State.OBSERVATION){
+                return switch (command){
+                    case "quitgame" -> quitGame();
+                    default -> help();
+                };
             } else { //in GAMESTATE
                 return switch (command){
-                    case "help" -> "you are in Gamestate";
-                    //case "quitgame" -> quitGame();
+                    case "quitgame" -> quitGame();
                     default -> help();
                 };
             }
@@ -150,9 +155,9 @@ public class ChessClient {
         List<GameData> games = server.listGames(currentUser.authToken());
         for(GameData game : games){
             if(game.gameID() == gameID){
-                activeChessGame = game.game();
+                activeChessGameData = game;
                 state = State.GAMESTATE;
-                return displayBoard(activeChessGame, playerColor) + String.format("Game %d joined successfully!", gameID);
+                return displayBoard(activeChessGameData, playerColor) + String.format("Game %d joined successfully!", gameID);
             }
         }
 
@@ -171,9 +176,9 @@ public class ChessClient {
         return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out!\n\n%s", help());
     }
 
-    public String displayBoard(ChessGame chessGame, String playerColor) {
+    public String displayBoard(GameData chessGame, String playerColor) {
         StringBuilder boardString = new StringBuilder();
-        ChessBoard board = chessGame.getBoard();
+        ChessBoard board = chessGame.game().getBoard();
 
         boolean isWhitePlayer = playerColor.equalsIgnoreCase("white");
 
@@ -249,10 +254,27 @@ public class ChessClient {
         };
     }
 
+    public String quitGame(String... params){
+        activeChessGameData = null;
+        state = State.SIGNEDIN;
+        return String.format(SET_TEXT_COLOR_GREEN +
+                "You have exited the game and returned to the main menu.\n%s",help());
+    }
 
+    public String observeGame(String... params) throws ResponseException {
+        int gameID = Integer.parseInt(params[0]);
 
-
-
+        List<GameData> games = server.listGames(currentUser.authToken());
+        for(GameData game : games){
+            if(game.gameID() == gameID){
+                activeChessGameData = game;
+                state = State.GAMESTATE;
+                return displayBoard(activeChessGameData, "white") +
+                        String.format(SET_TEXT_COLOR_GREEN + "Observing game %d", gameID);
+            }
+        }
+        return String.format(SET_TEXT_COLOR_RED + "Sorry, game %d does not exist!", gameID);
+    }
 
     public String help() {
         if (state == State.SIGNEDOUT){
@@ -267,13 +289,19 @@ public class ChessClient {
                 - CreateGame <game name>
                 - ListGames
                 - JoinGame <gameID> <playerColor>
+                - ObserveGame <gameID>
                 - Logout <authentication token>
                 - Help
                 - Quit
                 """;
-        } else { //GAMESTATE
+        } else if(state == State.OBSERVATION){
             return SET_TEXT_COLOR_BLUE + """
-                    - quitGame
+                    - QuitGame
+                    - Help
+                    """;
+        }else { //GAMESTATE
+            return SET_TEXT_COLOR_BLUE + """
+                    - QuitGame
                     - Help
                     """;
         }

@@ -18,10 +18,6 @@ public class UserService {
             throw new DataAccessException("unauthorized");
         }
 
-        if (mySQLAuthDAO.userHasAuthToken(loginRequest.username())) {
-            throw new DataAccessException("You're already logged in!");
-        }
-
         AuthData authData = mySQLAuthDAO.createAuth(loginRequest.username());
         return new LoginResult(authData.username(), authData.authToken());
     }

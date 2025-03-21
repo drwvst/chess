@@ -4,6 +4,7 @@ import dataaccess.*;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,17 +23,25 @@ public class GameServiceTest {
     void setUp() throws DataAccessException {
         authDAO = MySQLAuthDAO.getInstance();
         gameDAO = MySQLGameDAO.getInstance();
+        MySQLUserDAO userDAO = MySQLUserDAO.getInstance();
         gameService = new GameService();
 
         // Clear previous data
         DatabaseManager.clear();
 
-        // Create test users
-        AuthData user1 = authDAO.createAuth("testDude");
-        AuthData user2 = authDAO.createAuth("theOtherGuy");
+        UserData user1 = new UserData("testDude", "password", "testDude@gmail.com");
+        UserData user2 = new UserData("theOtherGuy", "password", "theOtherGuy@gmail.com");
 
-        validAuthToken = user1.authToken();
-        anotherAuthToken = user2.authToken();
+        // Ensure test users exist in the database
+        userDAO.createUser(user1);
+        userDAO.createUser(user2);
+
+        // Create test users
+        AuthData auth1 = authDAO.createAuth("testDude");
+        AuthData auth2 = authDAO.createAuth("theOtherGuy");
+
+        validAuthToken = auth1.authToken();
+        anotherAuthToken = auth2.authToken();
     }
 
     @Test

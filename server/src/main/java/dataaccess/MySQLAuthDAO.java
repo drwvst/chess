@@ -66,21 +66,4 @@ public class MySQLAuthDAO {
         }
     }
 
-    public boolean userHasAuthToken(String username) throws DataAccessException {
-        String sqlString = "SELECT COUNT(*) FROM auth_tokens WHERE username = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sqlString)) {
-
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Error checking auth token: " + e.getMessage());
-        }
-        return false;
-    }
 }

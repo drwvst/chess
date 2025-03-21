@@ -1,4 +1,4 @@
-package serverFacade;
+package serverfacade;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
@@ -7,7 +7,6 @@ import model.*;
 import java.io.*;
 import java.net.*;
 import java.util.List;
-import java.util.Map;
 
 public class ServerFacade {
 

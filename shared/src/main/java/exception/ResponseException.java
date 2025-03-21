@@ -30,8 +30,4 @@ public class ResponseException extends Exception {
         return new ResponseException(status, message);
     }
 
-
-    public int StatusCode() {
-        return statusCode;
-    }
 }

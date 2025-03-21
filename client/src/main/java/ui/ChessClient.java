@@ -1,5 +1,6 @@
 package ui;
 
+import chess.*;
 import model.*;
 import exception.ResponseException;
 import serverFacade.ServerFacade;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class ChessClient {
     public AuthData currentUser;
-    public GameData activeChessGame;
+    public ChessGame activeChessGame;
     //private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
@@ -121,16 +122,16 @@ public class ChessClient {
                         FUN_RIGHT_ARROW + "\n" + SET_TEXT_COLOR_LIGHT_GREY + RESET_TEXT_BOLD_FAINT +
                         "    White Player: " + whitePlayerString +
                         "\n    Black Player: " + blackPlayerString + "\n", data.gameID(), data.gameName()));
+            } else {
+                outputList.append(String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "%d) %s" +
+                        FUN_RIGHT_ARROW + "\n" + SET_TEXT_COLOR_WHITE + RESET_TEXT_BOLD_FAINT +
+                        "    White Player: " + whitePlayerString + SET_TEXT_COLOR_WHITE +
+                        "\n    Black Player: " + blackPlayerString + "\n", data.gameID(), data.gameName()));
             }
-
-            outputList.append(String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "%d) %s" +
-                    FUN_RIGHT_ARROW + "\n" + SET_TEXT_COLOR_WHITE + RESET_TEXT_BOLD_FAINT +
-                    "    White Player: " + whitePlayerString + SET_TEXT_COLOR_WHITE +
-                    "\n    Black Player: " + blackPlayerString + "\n", data.gameID(), data.gameName()));
         }
 
         return String.format(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + WHITE_KING + "Games" +
-                WHITE_KING + "\n%s", outputList);
+                WHITE_KING + "\n%s\n%s", outputList, help());
     }
 
     public String joinGame(String... params) throws ResponseException{
@@ -142,10 +143,20 @@ public class ChessClient {
         int gameID = Integer.parseInt(params[0]);
         var playerColor = params[1];
 
+
         server.joinGame(currentUser.authToken(), gameID, playerColor);
-        state = State.GAMESTATE;
-        return String.format("Game %d joined successfully!", gameID);
-        //game happens here?
+
+        List<GameData> games = server.listGames(currentUser.authToken());
+        for(GameData game : games){
+            if(game.gameID() == gameID){
+                activeChessGame = game.game();
+                state = State.GAMESTATE;
+                return displayBoard(activeChessGame, playerColor) + String.format("Game %d joined successfully!", gameID);
+            }
+        }
+
+        throw new ResponseException(400, "Failed to retrieve game after joining.");
+        //printBoard(ChessGame game, PlayerColor playerColor)
     }
 
     public String logout(String... params) throws ResponseException{
@@ -158,6 +169,59 @@ public class ChessClient {
         state = State.SIGNEDOUT;
         return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out!\n\n%s", help());
     }
+
+    public String displayBoard(ChessGame chessGame, String playerColor){
+        StringBuilder boardString = new StringBuilder();
+        ChessBoard board = chessGame.getBoard();
+        for (int row = 8; row >= 1; row--) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+
+                if((row+col) % 2 == 0){
+                    boardString.append(SET_BG_COLOR_DARK_BROWN);
+                } else {
+                    boardString.append(SET_BG_COLOR_LIGHT_BROWN);
+                }
+
+                if (piece != null) {
+                    String pieceChar = getPieceChar(piece, playerColor);
+                    boardString.append(pieceChar);
+                } else {
+                    boardString.append(EMPTY);
+                }
+                boardString.append(RESET_BG_COLOR);
+            }
+            //boardString.append(RESET_BG_COLOR);
+            boardString.append("\n");
+        }
+        boardString.append(RESET_BG_COLOR);
+        boardString.append(RESET_TEXT_COLOR);
+        boardString.append("\n");
+        return boardString.toString();
+    }
+
+    private String getPieceChar(ChessPiece piece, String playerColor) {
+        boolean isBlack = piece.getTeamColor() == ChessGame.TeamColor.BLACK;
+
+        boolean showWhitePieces = playerColor.equalsIgnoreCase("white");
+
+        return switch (piece.getPieceType()) {
+            case KING -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_KING : SET_TEXT_COLOR_WHITE + BLACK_KING;
+            case QUEEN -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_QUEEN : SET_TEXT_COLOR_WHITE + BLACK_QUEEN;
+            case ROOK -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_ROOK : SET_TEXT_COLOR_WHITE + BLACK_ROOK;
+            case BISHOP -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_BISHOP : SET_TEXT_COLOR_WHITE + BLACK_BISHOP;
+            case KNIGHT -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_KNIGHT : SET_TEXT_COLOR_WHITE + BLACK_KNIGHT;
+            case PAWN -> (isBlack == showWhitePieces) ?
+                    SET_TEXT_COLOR_BLACK + BLACK_PAWN : SET_TEXT_COLOR_WHITE + BLACK_PAWN;
+            default -> EMPTY;
+        };
+    }
+
 
 
 

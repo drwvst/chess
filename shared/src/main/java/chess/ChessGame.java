@@ -66,7 +66,7 @@ public class ChessGame {
             testBoard.addPiece(move.getEndPosition(), piece);
             testBoard.addPiece(move.getStartPosition(), null);
 
-            if(!isInCheck(piece.getTeamColor(), testBoard)) {
+            if(isInCheck(piece.getTeamColor(), testBoard)) {
                 legalMoves.add(move);
             }
         }
@@ -151,7 +151,7 @@ public class ChessGame {
     //Override for Checkmate Testing
     public boolean isInCheck(TeamColor teamColor, ChessBoard testBoard) {
         ChessPosition kingPosition = findKingPosition(teamColor, testBoard);
-        return kingPosition != null && isKingAttacked(kingPosition, teamColor, testBoard);
+        return kingPosition == null || !isKingAttacked(kingPosition, teamColor, testBoard);
     }
 
     private ChessPosition findKingPosition(TeamColor teamColor, ChessBoard testBoard) {
@@ -225,7 +225,7 @@ public class ChessGame {
         for (ChessMove move : kingPiece.pieceMoves(board, kingPosition)) {
             ChessBoard testBoard = new ChessBoard(board);
             performMove(testBoard, move, teamColor);
-            if (!isInCheck(teamColor, testBoard)) {
+            if (isInCheck(teamColor, testBoard)) {
                 return true;
             }
         }
@@ -294,7 +294,7 @@ public class ChessGame {
     private boolean isValidDefensiveMove(ChessMove move, TeamColor teamColor) {
         ChessBoard testBoard = new ChessBoard(board);
         performMove(testBoard, move, teamColor);
-        return !isInCheck(teamColor, testBoard);
+        return isInCheck(teamColor, testBoard);
     }
 
     private void performMove(ChessBoard board, ChessMove move, TeamColor teamColor) {
@@ -354,7 +354,7 @@ public class ChessGame {
         testBoard.addPiece(move.getEndPosition(), piece);
         testBoard.addPiece(position, null);
 
-        return !isInCheck(teamColor, testBoard);
+        return isInCheck(teamColor, testBoard);
     }
 
     /**

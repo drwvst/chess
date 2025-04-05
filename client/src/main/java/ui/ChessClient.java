@@ -262,6 +262,10 @@ public class ChessClient {
     }
 
     public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: <gameID>");
+        }
         int gameID = Integer.parseInt(params[0]);
 
         List<GameData> games = server.listGames(currentUser.authToken());

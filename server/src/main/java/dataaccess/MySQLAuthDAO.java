@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class MySQLAuthDAO {
     private static final MySQLAuthDAO INSTANCE = new MySQLAuthDAO();
-    private MySQLAuthDAO() {};
+    public MySQLAuthDAO() {};
 
     public static  MySQLAuthDAO getInstance(){
         return INSTANCE;

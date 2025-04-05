@@ -10,8 +10,8 @@ import java.util.Objects;
  * Note: You can add to this class, but you should not alter the existing
  * methods.
  */
-public record UserGameCommand(websocket.commands.UserGameCommand.CommandType commandType,
-                              String userName, String authToken, Integer gameID) {
+public record UserGameCommand(websocket.commands.UserGameCommand.CommandType commandType, String authToken,
+                              Integer gameID) {
 
     public enum CommandType {
         CONNECT,

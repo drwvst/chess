@@ -13,7 +13,7 @@ public class MySQLGameDAO {
     private static final MySQLGameDAO INSTANCE = new MySQLGameDAO();
     private static final Gson GSON = new GsonBuilder().create();
 
-    private MySQLGameDAO() {}
+    public MySQLGameDAO() {}
 
     public static MySQLGameDAO getInstance() {
         return INSTANCE;

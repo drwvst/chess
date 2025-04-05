@@ -19,12 +19,12 @@ public class ConnectionManager {
         connections.remove(visitorName);
     }
 
-    public void broadcast(String excludeVisitorName, Notification notification) throws IOException {
+    public void broadcast(String excludeVisitorName, ServerMessage serverMessage) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(notification.toString());
+                    c.send(serverMessage.toString());
                 }
             } else {
                 removeList.add(c);

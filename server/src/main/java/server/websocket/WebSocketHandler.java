@@ -8,6 +8,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
+import chess.ChessGame;
 
 import java.io.IOException;
 
@@ -40,26 +41,43 @@ public class WebSocketHandler {
         }
     }
 
-    private void connectUser(String playerName, String messageJson, Session session) throws IOException{
+    private void connectUser(String playerName, String messageJson, Session session) throws IOException, DataAccessException{
         UserGameCommand connectCommand = new Gson().fromJson(messageJson, UserGameCommand.class);
-        String authToken = connectCommand.authToken();
+        //String authToken = connectCommand.authToken();
         Integer gameID = connectCommand.gameID();
 
         if(gameID == null){
             wsSessionError(session, "Error: Game ID is required to execute CONNECT ws command");
             return;
-
+        }
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null){
+            wsSessionError(session, "Error: Game " + gameID + " does not exist!");
+            return;
         }
 
+        String userRole;
+        ChessGame.TeamColor userColor = null;
+        if (playerName.equals(gameData.whiteUsername())) {
+            userColor = ChessGame.TeamColor.WHITE;
+        } else if (playerName.equals(gameData.blackUsername())) {
+            userColor = ChessGame.TeamColor.BLACK;
+        }
+        if (userColor != null) {
+            userRole = userColor.toString();
+        } else {
+            userRole = "observer";
+        }
 
+        connectionManager.add(playerName, gameID, session);
+        //Sending LOAD_GAME ws message to ROOT CLIENT ONLY
+        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
+        session.getRemote().sendString(gson.toJson(loadGameMessage));
 
-        //connectionManager.add(playerName, session);
-        var serverMessage1 = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "");
-
-
-        var message = String.format("%s has joined the game", playerName);
-        var serverMessage2 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        //connectionManager.broadcast(playerName, serverMessage2);
+        //Sending NOTIFICATION to all other clients in that chess game
+        String notifString = String.format("%s joined the game as %s", playerName, userRole);
+        ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notifString);
+        connectionManager.broadcast(gameID, playerName, serverMessage);
     }
 
 

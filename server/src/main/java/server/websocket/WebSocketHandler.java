@@ -6,6 +6,7 @@ import model.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.annotations.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import chess.ChessGame;
@@ -29,17 +30,56 @@ public class WebSocketHandler {
         this.connectionManager = new ConnectionManager();
     }
 
-    @OnWebSocketMessage
-    public void onMessage(Session session, String messageJson) throws IOException, DataAccessException {
-        UserGameCommand command = new Gson().fromJson(messageJson, UserGameCommand.class);
-        String authToken = command.authToken();
-        AuthData authData = authDAO.getAuthToken(authToken);
-        String username = authData.username();
 
-        switch(command.commandType()){
-            case CONNECT -> connectUser(username, messageJson, session);
+    @OnWebSocketMessage
+    public void onMessage(Session session, String messageJson) throws IOException { // Removed DataAccessException for now, handle it inside
+        UserGameCommand command;
+        try {
+            command = new Gson().fromJson(messageJson, UserGameCommand.class);
+        } catch (Exception e) {
+            wsSessionError(session, "Error: Invalid command format.");
+            return;
+        }
+
+        String authToken = command.authToken();
+        AuthData authData = null;
+        String username = null;
+
+        try {
+            authData = authDAO.getAuthToken(authToken);
+            if (authData == null) {
+                wsSessionError(session, "Error: Unauthorized - Invalid auth token.");
+                return; // Stop processing if token is invalid
+            }
+            username = authData.username();
+        } catch (DataAccessException e) {
+            wsSessionError(session, "Error: Database error during authentication: " + e.getMessage());
+            return; // Stop processing on DB error
+        } catch (Exception e) { // Catch unexpected errors during auth
+            wsSessionError(session, "Error: Unexpected error during authentication: " + e.getMessage());
+            return;
+        }
+
+        // Now username is guaranteed to be non-null if we reach here
+        try {
+            switch (command.commandType()) {
+                case CONNECT -> connectUser(username, messageJson, session);
+                // case MAKE_MOVE -> ... // Add other cases later
+                // case LEAVE -> ...
+                // case RESIGN -> ...
+                default -> wsSessionError(session, "Error: Unknown command type.");
+            }
+        } catch (DataAccessException e) {
+            wsSessionError(session, "Error: Database error during command execution: " + e.getMessage());
+        } catch (IOException e) {
+            // IOException from sending messages should ideally be logged,
+            // but sending another error might cause loops. Consider logging.
+            System.err.println("IOException during command execution: " + e.getMessage());
+        } catch (Exception e) { // Catch other potential errors within command handlers
+            wsSessionError(session, "Error: Unexpected error during command execution: " + e.getMessage());
         }
     }
+
 
     private void connectUser(String playerName, String messageJson, Session session) throws IOException, DataAccessException{
         UserGameCommand connectCommand = new Gson().fromJson(messageJson, UserGameCommand.class);
@@ -70,6 +110,7 @@ public class WebSocketHandler {
         }
 
         connectionManager.add(playerName, gameID, session);
+
         //Sending LOAD_GAME ws message to ROOT CLIENT ONLY
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         session.getRemote().sendString(gson.toJson(loadGameMessage));
@@ -79,7 +120,6 @@ public class WebSocketHandler {
         ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notifString);
         connectionManager.broadcast(gameID, playerName, serverMessage);
     }
-
 
 
 
@@ -96,7 +136,5 @@ public class WebSocketHandler {
             System.err.println("Error sending error message '" + errorMessage + "': " + e.getMessage());
         }
     }
-
-    private record ErrorMessage(String message) {}
 
 }

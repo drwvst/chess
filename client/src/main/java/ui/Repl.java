@@ -12,7 +12,7 @@ public class Repl implements NotificationHandler {
     private final Gson gson = new Gson();
 
     public Repl(String serverUrl) {
-        client = new ChessClient(serverUrl);
+        client = new ChessClient(serverUrl, this);
     }
 
     public void run() {

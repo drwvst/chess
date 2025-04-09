@@ -2,11 +2,14 @@ package ui;
 
 import chess.*;
 import model.*;
+import websocket.WebSocketFacade;
+import websocket.NotificationHandler;
 import exception.ResponseException;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
@@ -14,54 +17,75 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
     public AuthData currentUser;
     public GameData activeChessGameData;
-    //private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
+    private boolean quitting = false;
 
-    public ChessClient(String serverUrl) {
+    private WebSocketFacade ws;
+    private final NotificationHandler notificationHandler;
+    private ChessGame.TeamColor playerColor = null;
+
+    public ChessClient(String serverUrl, NotificationHandler handler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.notificationHandler = handler;
     }
 
     public String eval(String input){
+        if (quitting) return "quit";
+
         try {
             var tokens = input.toLowerCase().split(" ");
             var command = (tokens.length > 0) ? tokens[0] : "help";
             var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-            if (state == State.SIGNEDOUT){
-                return switch (command){
-                    case "register" -> register(parameters);
-                    case "login" -> login(parameters);
-                    case "quit" -> quit();
-                    default -> help();
-                };
-            } else if (state == State.SIGNEDIN){
-                return switch (command){
-                    case "creategame" -> createGame(parameters);
-                    case "listgames" -> listGames(parameters);
-                    case "joingame" -> joinGame(parameters);
-                    case "observegame" -> observeGame(parameters);
-                    case "logout" -> logout(parameters);
-                    case "quit" -> quit();
-                    default -> help();
-                };
-            } else if(state == State.OBSERVATION){
-                return switch (command){
-                    case "quitgame" -> quitGame();
-                    default -> help();
-                };
-            } else { //in GAMESTATE
-                return switch (command){
-                    case "quitgame" -> quitGame();
-                    default -> help();
-                };
-            }
+            return switch (state) {
+                case SIGNEDOUT -> evalSignedOut(command, parameters);
+                case SIGNEDIN -> evalSignedIn(command, parameters);
+                case GAMESTATE, OBSERVATION -> evalInGame(command, parameters);
+            };
         } catch (ResponseException ex) {
-            return ex.getMessage();
+            return SET_TEXT_COLOR_RED + "Error: " + ex.getMessage() + RESET_TEXT_COLOR;
+        } catch (Exception ex) {
+            return SET_TEXT_COLOR_RED + "Unexpected Error: " + ex.getMessage() + RESET_TEXT_COLOR;
         }
     }
+
+    private String evalSignedOut(String command, String... parameters) throws ResponseException {
+        return switch (command) {
+            case "register" -> register(parameters);
+            case "login" -> login(parameters);
+            case "quit" -> quit();
+            default -> help();
+        };
+    }
+
+    private String evalSignedIn(String command, String... parameters) throws ResponseException {
+        return switch (command) {
+            case "creategame" -> createGame(parameters);
+            case "listgames" -> listGames(); // No parameters needed
+            case "joingame" -> joinGame(parameters);
+            case "observegame" -> observeGame(parameters);
+            case "logout" -> logout(); // No parameters needed
+            case "quit" -> quit();
+            default -> help();
+        };
+    }
+
+
+    private String evalInGame(String command, String... parameters) throws ResponseException {
+        return switch (command) {
+//            case "makemove" -> makeMove(parameters);
+//            case "leave" -> leaveGame();
+//            case "resign" -> resignGame();
+//            case "redraw" -> redrawBoard();
+//            case "highlight" -> highlightMoves(parameters);
+            // Add other in-game commands (show legal moves)
+            default -> help();
+        };
+    }
+
 
     public String register(String... parameters) throws ResponseException {
         if (parameters.length != 3) {

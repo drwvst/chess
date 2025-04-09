@@ -294,7 +294,7 @@ public class ChessClient {
                 - ListGames
                 - JoinGame <gameID> <playerColor>
                 - ObserveGame <gameID>
-                - Logout <authentication token>
+                - Logout
                 - Help
                 - Quit
                 """;

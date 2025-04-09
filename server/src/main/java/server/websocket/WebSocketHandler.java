@@ -118,8 +118,8 @@ public class WebSocketHandler {
 
         //Sending NOTIFICATION to all other clients in that chess game
         String notifString = String.format("%s joined the game as %s", playerName, userRole);
-        ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notifString);
-        connectionManager.broadcast(gameID, playerName, serverMessage);
+        NotificationMessage notification = new NotificationMessage(notifString);
+        connectionManager.broadcast(gameID, playerName, notification);
     }
 
     private void MakeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
@@ -237,7 +237,7 @@ public class WebSocketHandler {
         connectionManager.remove(playerName);
 
         String notificationText = String.format("%s left the game.", playerName);
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notificationText);
+        NotificationMessage notification = new NotificationMessage(notificationText);
         connectionManager.broadcast(gameID, playerName, notification);
     }
 
@@ -271,7 +271,7 @@ public class WebSocketHandler {
         System.out.println("Game ID " + gameID + " marked as finished due to resignation by " + username);
 
         String notificationText = String.format("%s (%s) has resigned. The game is over.", username, resigningColor);
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notificationText);
+        NotificationMessage notification = new NotificationMessage(notificationText);
         connectionManager.broadcast(gameID, null, notification);
     }
 
@@ -287,16 +287,12 @@ public class WebSocketHandler {
     }
 
     private void broadcastGameUpdate(Integer gameID, ChessGame game) throws IOException {
-//        LoadGameMessage loadGameMsg = new LoadGameMessage(game);
-//        String loadGameJson = gson.toJson(loadGameMsg);
-//        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, loadGameJson);
-//        connectionManager.broadcast(gameID, null, message);
         LoadGameMessage loadGameMsg = new LoadGameMessage(game);
         connectionManager.broadcast(gameID, null, loadGameMsg);
     }
 
     private void broadcastNotification(Integer gameID, String excludePlayer, String messageText) throws IOException {
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, messageText);
+        NotificationMessage notification = new NotificationMessage(messageText);
         connectionManager.broadcast(gameID, excludePlayer, notification);
     }
 

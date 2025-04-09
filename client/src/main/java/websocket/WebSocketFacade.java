@@ -21,8 +21,8 @@ public class WebSocketFacade extends Endpoint{
 
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {
-            url = url.replace("http", "ws"); // Convert HTTP URL to WebSocket URL
-            URI socketURI = new URI(url + "/connect"); // Standardized endpoint, adjust if server uses "/ws"
+            url = url.replace("http", "ws");
+            URI socketURI = new URI(url + "/ws");
             this.notificationHandler = notificationHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -60,5 +60,34 @@ public class WebSocketFacade extends Endpoint{
     @Override
     public void onError(Session session, Throwable thr) {
         System.err.println("WebSocket error: " + thr.getMessage());
+    }
+
+    public void connect(String authToken, int gameID, ChessGame.TeamColor playerColor) throws ResponseException{
+        try{
+            var command = new ConnectCommand(authToken, gameID, playerColor);
+            send(command);
+        } catch (IOException e){
+            throw new ResponseException(500, "Send Failed (Connect): " + e.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
+        try {
+            var command = new MakeMoveCommand(authToken, gameID, move);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, "Send Failed (Make Move): " + ex.getMessage());
+        }
+    }
+
+
+
+
+    private void send(UserGameCommand command) throws IOException {
+        if (session.isOpen()) {
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+        } else {
+            System.err.println("Error: WebSocket session is not open. Cannot send command.");
+        }
     }
 }

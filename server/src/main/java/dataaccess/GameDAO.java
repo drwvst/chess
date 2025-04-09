@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.GameStatus;
 import java.util.*;
 
 public class GameDAO {
@@ -20,7 +21,14 @@ public class GameDAO {
     }
 
     public GameData createGame(String gameName){
-        GameData newGame = new GameData(nextGameID++, null, null, gameName, new ChessGame());
+        GameData newGame = new GameData(
+                nextGameID++,
+                null,
+                null,
+                gameName,
+                new ChessGame(),
+                GameStatus.ACTIVE
+        );
         games.put(newGame.gameID(), newGame);
         return newGame;
     }
@@ -30,7 +38,11 @@ public class GameDAO {
     }
 
     public void updateGame(GameData game){
-        games.put(game.gameID(), game);
+        if (games.containsKey(game.gameID())) {
+            games.put(game.gameID(), game);
+        } else {
+            System.err.println("Warning: Attempted to update non-existent game with ID: " + game.gameID());
+        }
     }
 
     public void clear(){

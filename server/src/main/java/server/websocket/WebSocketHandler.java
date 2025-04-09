@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
@@ -8,6 +9,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.annotations.*;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import chess.ChessGame;
@@ -123,7 +125,16 @@ public class WebSocketHandler {
 
     private void MakeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
             DataAccessException, InvalidMoveException {
+        MakeMoveCommand moveCommand = gson.fromJson(messageJson, MakeMoveCommand.class);
+        Integer gameID = moveCommand.getGameID();
+        ChessMove move = moveCommand.getMove();
 
+        if(gameID == null || move == null){
+            wsSessionError(session, "Game ID or Move data is NULL");
+            return;
+        }
+
+        GameData gameData = gameDAO.getGame(gameID);
     }
 
 

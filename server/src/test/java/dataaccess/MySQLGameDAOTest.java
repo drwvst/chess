@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.GameStatus;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
@@ -44,7 +45,7 @@ class MySQLGameDAOTest {
 
     @Test
     void testUpdateGameInvalidGameID() {
-        GameData fakeGame = new GameData(9999, "FakeWhite", "FakeBlack", "Fake Game", new ChessGame());
+        GameData fakeGame = new GameData(9999, "FakeWhite", "FakeBlack", "Fake Game", new ChessGame(), GameStatus.ACTIVE);
         assertThrows(DataAccessException.class, () -> GAME_DAO.updateGame(fakeGame));
     }
 

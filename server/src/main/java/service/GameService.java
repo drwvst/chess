@@ -4,9 +4,11 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
+import model.GameStatus;
 
 import javax.xml.crypto.Data;
 import java.util.List;
+import java.util.Objects;
 
 public class GameService {
 //    private final GameDAO gameDAO = GameDAO.getInstance();
@@ -32,22 +34,29 @@ public class GameService {
         GameData game = mySQLGameDAO.getGame(gameID);
 
         if(game == null){
-            throw new DataAccessException("bad request");
+            throw new DataAccessException("Error: Game not found.");
         }
-        if ("WHITE".equalsIgnoreCase(playerColor)) {
-            if (game.whiteUsername() != null) {
-                throw new DataAccessException("already taken");
+
+        GameStatus currentStatus = game.status();
+        GameData updatedGame;
+
+        if (playerColor == null) { // Spectator joining
+            return;
+        } else if ("WHITE".equalsIgnoreCase(playerColor)) { //
+            if (game.whiteUsername() != null && !game.whiteUsername().equals(authData.username())) {
+                throw new DataAccessException("Error: Color already taken.");
             }
-            game = new GameData(game.gameID(), authData.username(), game.blackUsername(), game.gameName(), game.game());
-        } else if ("BLACK".equalsIgnoreCase(playerColor)) {
-            if (game.blackUsername() != null) {
-                throw new DataAccessException("already taken");
+            updatedGame = new GameData(game.gameID(), authData.username(), game.blackUsername(), game.gameName(), game.game(), currentStatus);
+        } else if ("BLACK".equalsIgnoreCase(playerColor)) { //
+            if (game.blackUsername() != null && !game.blackUsername().equals(authData.username())) {
+                throw new DataAccessException("Error: Color already taken.");
             }
-            game = new GameData(game.gameID(), game.whiteUsername(), authData.username(), game.gameName(), game.game());
+            updatedGame = new GameData(game.gameID(), game.whiteUsername(), authData.username(), game.gameName(), game.game(), currentStatus);
         } else {
-            throw new DataAccessException("bad request");
+            throw new DataAccessException("Error: Invalid player color specified ('WHITE' or 'BLACK').");
         }
-        mySQLGameDAO.updateGame(game);
+
+        mySQLGameDAO.updateGame(updatedGame);
     }
 
 

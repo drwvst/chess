@@ -75,19 +75,44 @@ public class WebSocketFacade extends Endpoint{
         try {
             var command = new MakeMoveCommand(authToken, gameID, move);
             send(command);
-        } catch (IOException ex) {
-            throw new ResponseException(500, "Send Failed (Make Move): " + ex.getMessage());
+        } catch (IOException e) {
+            throw new ResponseException(500, "Send Failed (Make Move): " + e.getMessage());
         }
     }
 
+    public void leave(String authToken, int gameID) throws ResponseException{
+        try{
+            var command = new LeaveCommand(authToken, gameID);
+            send(command);
+        } catch (IOException e){
+            throw new ResponseException(500, "Send Failed (Leave): " + e.getMessage());
+        }
+    }
 
-
+    public void resign(String authToken, int gameID) throws ResponseException {
+        try {
+            var command = new ResignCommand(authToken, gameID);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, "Send Failed (Resign): " + ex.getMessage());
+        }
+    }
 
     private void send(UserGameCommand command) throws IOException {
         if (session.isOpen()) {
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } else {
             System.err.println("Error: WebSocket session is not open. Cannot send command.");
+        }
+    }
+
+    public void close() throws ResponseException {
+        try {
+            if (this.session != null && this.session.isOpen()) {
+                this.session.close();
+            }
+        } catch (IOException ex) {
+            throw new ResponseException(500,"Error closing WebSocket: " + ex.getMessage());
         }
     }
 }

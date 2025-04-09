@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import model.*;
@@ -32,7 +33,7 @@ public class WebSocketHandler {
 
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String messageJson) throws IOException { // Removed DataAccessException for now, handle it inside
+    public void onMessage(Session session, String messageJson) throws IOException {
         UserGameCommand command;
         try {
             command = new Gson().fromJson(messageJson, UserGameCommand.class);
@@ -41,7 +42,7 @@ public class WebSocketHandler {
             return;
         }
 
-        String authToken = command.authToken();
+        String authToken = command.getAuthToken();
         AuthData authData = null;
         String username = null;
 
@@ -49,20 +50,19 @@ public class WebSocketHandler {
             authData = authDAO.getAuthToken(authToken);
             if (authData == null) {
                 wsSessionError(session, "Error: Unauthorized - Invalid auth token.");
-                return; // Stop processing if token is invalid
+                return;
             }
             username = authData.username();
         } catch (DataAccessException e) {
             wsSessionError(session, "Error: Database error during authentication: " + e.getMessage());
-            return; // Stop processing on DB error
-        } catch (Exception e) { // Catch unexpected errors during auth
+            return;
+        } catch (Exception e) {
             wsSessionError(session, "Error: Unexpected error during authentication: " + e.getMessage());
             return;
         }
 
-        // Now username is guaranteed to be non-null if we reach here
         try {
-            switch (command.commandType()) {
+            switch (command.getCommandType()) {
                 case CONNECT -> connectUser(username, messageJson, session);
                 // case MAKE_MOVE -> ... // Add other cases later
                 // case LEAVE -> ...
@@ -84,7 +84,7 @@ public class WebSocketHandler {
     private void connectUser(String playerName, String messageJson, Session session) throws IOException, DataAccessException{
         UserGameCommand connectCommand = new Gson().fromJson(messageJson, UserGameCommand.class);
         //String authToken = connectCommand.authToken();
-        Integer gameID = connectCommand.gameID();
+        Integer gameID = connectCommand.getGameID();
 
         if(gameID == null){
             wsSessionError(session, "Error: Game ID is required to execute CONNECT ws command");
@@ -119,6 +119,11 @@ public class WebSocketHandler {
         String notifString = String.format("%s joined the game as %s", playerName, userRole);
         ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notifString);
         connectionManager.broadcast(gameID, playerName, serverMessage);
+    }
+
+    private void MakeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
+            DataAccessException, InvalidMoveException {
+
     }
 
 

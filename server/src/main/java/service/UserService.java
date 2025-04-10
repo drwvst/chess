@@ -15,7 +15,7 @@ public class UserService {
         UserData user = mySQLUserDAO.getUser(loginRequest.username());
 
         if(!verifyPass(loginRequest.password(), user.password())) {
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException("Error: unauthorized");
         }
 
         AuthData authData = mySQLAuthDAO.createAuth(loginRequest.username());

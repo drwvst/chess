@@ -51,7 +51,7 @@ public class MySQLUserDAO {
                 return new UserData(rs.getString("username"), rs.getString("password_hash"),
                         rs.getString("email"));
             } else {
-                throw new DataAccessException("unauthorized"); // User DNE so no access
+                throw new DataAccessException("Error: unauthorized"); // User DNE so no access
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error retrieving user: " + e.getMessage());

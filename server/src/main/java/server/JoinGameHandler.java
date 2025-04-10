@@ -23,20 +23,27 @@ public class JoinGameHandler implements Route{
             response.status(200);
             return gson.toJson(new SuccessMessage());
         } catch (Exception e) {
-            if(Objects.equals(e.getMessage(), "bad request")){
-                response.status(400);
-                return gson.toJson(new ErrorMessage(e.getMessage()));
-            }
-            if(Objects.equals(e.getMessage(), "unauthorized")){
+            String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+
+            if (msg.contains("unauthorized")) {
                 response.status(401);
-                return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
+                return gson.toJson(new ErrorMessage("Error: unauthorized"));
             }
-            if(Objects.equals(e.getMessage(), "already taken")){
+            if (msg.contains("not found") || msg.contains("invalid player color") || msg.contains("game id")) {
+                response.status(400);
+                return gson.toJson(new ErrorMessage("Error: bad request"));
+            }
+            if (msg.contains("already taken")) {
                 response.status(403);
+                return gson.toJson(new ErrorMessage("Error: already taken"));
+            }
+            if (Objects.equals(e.getMessage(), "bad request")) {
+                response.status(400);
                 return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
             }
+
             response.status(500);
-            return gson.toJson(new ErrorMessage(e.getMessage()));
+            return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
         }
     }
 

@@ -41,7 +41,7 @@ public class MySQLAuthDAO {
             if(rs.next()){
                 return new AuthData(rs.getString("token"), rs.getString("username"));
             } else {
-                throw new DataAccessException("unauthorized");
+                throw new DataAccessException("Error: unauthorized");
             }
         } catch (SQLException e){
             throw new DataAccessException("Error retrieving authToken: " + e.getMessage());

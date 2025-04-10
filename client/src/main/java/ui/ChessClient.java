@@ -265,7 +265,9 @@ public class ChessClient {
     // IN GAME WS METHODS
     public String makeMove(String... params) throws ResponseException {
         assertInGame();
-        if(state == State.OBSERVATION) throw new ResponseException(400, "Observers cannot make moves.");
+        if(state == State.OBSERVATION) {
+            throw new ResponseException(400, "Observers cannot make moves.");
+        }
         if (params.length != 1) {
             throw new ResponseException(400, "Expected: makeMove <ex: e2e4>");
         }

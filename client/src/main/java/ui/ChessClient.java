@@ -261,7 +261,6 @@ public class ChessClient {
         }
         return String.format(SET_TEXT_COLOR_RED + "Sorry, game %d does not exist!", gameID);
     }
-
     // IN GAME WS METHODS
     public String makeMove(String... params) throws ResponseException {
         assertInGame();

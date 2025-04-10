@@ -110,6 +110,7 @@ public class DatabaseManager {
                     black_player VARCHAR(50),
                     game_name VARCHAR(50),
                     chess_game TEXT NOT NULL,
+                    status VARCHAR(10) NOT NULL DEFAULT 'ACTIVE',
                     FOREIGN KEY (white_player) REFERENCES users(username),
                     FOREIGN KEY (black_player) REFERENCES users(username)
                 )

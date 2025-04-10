@@ -69,7 +69,7 @@ public class WebSocketHandler {
         try {
             switch (command.getCommandType()) {
                 case CONNECT -> connectUser(username, messageJson, session);
-                case MAKE_MOVE -> MakeMoveHandler(username, messageJson, session);
+                case MAKE_MOVE -> makeMoveHandler(username, messageJson, session);
                 case LEAVE -> leaveHandler(username, messageJson, session);
                 case RESIGN -> handleResign(username, messageJson, session);
                 default -> wsSessionError(session, "Error: Unknown command type received: " + command.getCommandType());
@@ -122,10 +122,10 @@ public class WebSocketHandler {
         connectionManager.broadcast(gameID, playerName, notification);
     }
 
-    private void MakeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
+    private void makeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
             DataAccessException, InvalidMoveException {
 
-        makeMoveCommand moveCommand = gson.fromJson(messageJson, makeMoveCommand.class);
+        MakeMoveCommand moveCommand = gson.fromJson(messageJson, MakeMoveCommand.class);
         Integer gameID = moveCommand.getGameID();
         ChessMove move = moveCommand.getMove();
 

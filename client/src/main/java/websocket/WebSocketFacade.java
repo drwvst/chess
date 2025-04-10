@@ -96,7 +96,7 @@ public class WebSocketFacade extends Endpoint{
 
     public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
         try {
-            var command = new makeMoveCommand(authToken, gameID, move);
+            var command = new MakeMoveCommand(authToken, gameID, move);
             send(command);
         } catch (IOException e) {
             throw new ResponseException(500, "Send Failed (Make Move): " + e.getMessage());

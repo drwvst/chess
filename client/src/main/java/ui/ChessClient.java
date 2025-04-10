@@ -348,10 +348,6 @@ public class ChessClient {
             return SET_TEXT_COLOR_YELLOW + "No piece at " + params[0] + "." + RESET_TEXT_COLOR;
         }
 
-//        if (state == State.GAMESTATE && piece.getTeamColor() != this.playerColor) {
-//            return SET_TEXT_COLOR_YELLOW + "You can only highlight your own pieces." + RESET_TEXT_COLOR;
-//        }
-
         java.util.Collection<ChessMove> validMoves = activeChessGameData.game().validMoves(position);
         if (validMoves == null || validMoves.isEmpty()) {
             return SET_TEXT_COLOR_YELLOW + "No valid moves for the piece at " + params[0] + "." + RESET_TEXT_COLOR;
@@ -378,11 +374,6 @@ public class ChessClient {
         }
     }
 
-
-
-
-
-
     //Position Parse Methods
     private ChessPosition parsePosition(String pos) {
         int col = pos.toLowerCase().charAt(0) - 'a' + 1;
@@ -402,7 +393,6 @@ public class ChessClient {
             default -> throw new IllegalArgumentException("Invalid promotion piece");
         };
     }
-
     public String help() {
         if (state == State.SIGNEDOUT){
             return SET_TEXT_COLOR_BLUE + """
@@ -440,7 +430,6 @@ public class ChessClient {
                     """;
         }
     }
-
     public String quit() throws ResponseException {
         quitting = true;
         if (ws != null) {
@@ -464,10 +453,6 @@ public class ChessClient {
         System.out.println(SET_TEXT_COLOR_MAGENTA + "Exiting Chess Client. Goodbye!" + RESET_TEXT_COLOR);
         return "quit";
     }
-
-
-
-
     //Assert Methods
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {

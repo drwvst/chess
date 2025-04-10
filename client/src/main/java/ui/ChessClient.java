@@ -167,116 +167,71 @@ public class ChessClient {
     public String joinGame(String... params) throws ResponseException{
         assertSignedIn();
         if (params.length != 2) {
-            throw new ResponseException(400, "Expected: <gameID> <playerColor>");
+            throw new ResponseException(400, "Expected: <gameID> <WHITE|BLACK>");
         }
 
-        int gameID = Integer.parseInt(params[0]);
-        var playerColor = params[1];
+        int gameID;
+        try {
+            gameID = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Invalid Game ID format. Please enter a number.");
+        }
 
+        String colorString = params[1].toUpperCase();
+        ChessGame.TeamColor requestedColor;
+        try {
+            requestedColor = ChessGame.TeamColor.valueOf(colorString);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseException(400, "Invalid color. Choose WHITE or BLACK.");
+        }
 
-        server.joinGame(currentUser.authToken(), gameID, playerColor);
+        server.joinGame(currentUser.authToken(), gameID, colorString);
+
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        ws.connect(currentUser.authToken(), gameID, requestedColor);
+
+        this.playerColor = requestedColor; // Store player color
+        // Need game data for context, but rely on LOAD_GAME message for initial display
 
         List<GameData> games = server.listGames(currentUser.authToken());
         for(GameData game : games){
             if(game.gameID() == gameID){
                 activeChessGameData = game;
-                state = State.GAMESTATE;
-                return displayBoard(activeChessGameData, playerColor) + String.format("Game %d joined successfully!", gameID);
+//                state = State.GAMESTATE;
+//                return displayBoard(activeChessGameData, playerColor) + String.format("Game %d joined successfully!", gameID);
             }
         }
+        state = State.GAMESTATE;
+        return String.format(SET_TEXT_COLOR_GREEN + "Joining game %d as %s. Waiting for game state...", gameID, requestedColor);
 
-        throw new ResponseException(400, "Failed to retrieve game after joining.");
+        //throw new ResponseException(400, "Failed to retrieve game after joining.");
         //printBoard(ChessGame game, PlayerColor playerColor)
     }
 
     public String logout(String... params) throws ResponseException{
-        assertSignedIn();
+        assertSignedInOrInGame();
         if (params.length != 0) {
             throw new ResponseException(400, "To logout, simply type 'logout'");
         }
+        if (ws != null) {
+            try {
+                ws.close();
+            } catch (ResponseException e) {
+                System.out.println(SET_TEXT_COLOR_YELLOW + "Warning: Error closing WebSocket during logout: " + e.getMessage() + RESET_TEXT_COLOR);
+            } finally {
+                ws = null;
+            }
+        }
 
         server.logout(currentUser.authToken());
+        String username = currentUser.username();
+        currentUser = null;
+        activeChessGameData = null;
+        playerColor = null;
         state = State.SIGNEDOUT;
-        return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out!\n\n%s", help());
+        return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out, %s!\n\n%s", username, help());
     }
 
-    public String displayBoard(GameData chessGame, String playerColor) {
-        StringBuilder boardString = new StringBuilder();
-        ChessBoard board = chessGame.game().getBoard();
-
-        boolean isWhitePlayer = playerColor.equalsIgnoreCase("white");
-
-        boardString.append("\n").append(SET_BG_COLOR_GREY).append("   ");
-
-        playerColorCoordinateSet(boardString, isWhitePlayer);
-
-        for (int row = 1; row <= 8; row++) {
-            int boardRow = isWhitePlayer ? (9 - row) : row;
-
-            boardString.append(SET_BG_COLOR_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(boardRow).append(" ");
-
-            for (int col = 1; col <= 8; col++) {
-                int boardCol = isWhitePlayer ? col : (9 - col);
-
-                ChessPiece piece = board.getPiece(new ChessPosition(boardRow, boardCol));
-
-                if ((boardRow + boardCol) % 2 == 0) {
-                    boardString.append(SET_BG_COLOR_DARK_BROWN);
-                } else {
-                    boardString.append(SET_BG_COLOR_LIGHT_BROWN);
-                }
-
-                if (piece != null) {
-                    String pieceChar = getPieceChar(piece, playerColor);
-                    boardString.append(pieceChar);
-                } else {
-                    boardString.append(EMPTY);
-                }
-                boardString.append(RESET_BG_COLOR);
-            }
-
-            boardString.append(SET_BG_COLOR_GREY)
-                    .append(SET_TEXT_COLOR_BLACK).append(" ").append(boardRow).append(" ").append(RESET_BG_COLOR)
-                    .append("\n");
-        }
-
-        boardString.append(SET_BG_COLOR_GREY).append("   ");
-
-        playerColorCoordinateSet(boardString, isWhitePlayer);
-
-        boardString.append(RESET_BG_COLOR);
-        boardString.append(RESET_TEXT_COLOR);
-        boardString.append("\n");
-        return boardString.toString();
-    }
-
-    private void playerColorCoordinateSet(StringBuilder boardString, boolean isWhitePlayer) {
-        if (isWhitePlayer) {
-            for (char c = 'a'; c <= 'h'; c++) {
-                boardString.append(SET_TEXT_COLOR_BLACK).append(" ").append(c).append("\u2003");
-            }
-        } else {
-            for (char c = 'h'; c >= 'a'; c--) {
-                boardString.append(SET_TEXT_COLOR_BLACK).append(" ").append(c).append("\u2003");
-            }
-        }
-        boardString.append("   ").append(RESET_BG_COLOR).append("\n");
-    }
-
-
-    private String getPieceChar(ChessPiece piece, String playerColor) {
-        boolean isBlackPiece = piece.getTeamColor() == ChessGame.TeamColor.BLACK;
-
-        return switch (piece.getPieceType()) {
-            case KING -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KING : SET_TEXT_COLOR_WHITE + BLACK_KING;
-            case QUEEN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_QUEEN : SET_TEXT_COLOR_WHITE + BLACK_QUEEN;
-            case ROOK -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_ROOK : SET_TEXT_COLOR_WHITE + BLACK_ROOK;
-            case BISHOP -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_BISHOP : SET_TEXT_COLOR_WHITE + BLACK_BISHOP;
-            case KNIGHT -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KNIGHT : SET_TEXT_COLOR_WHITE + BLACK_KNIGHT;
-            case PAWN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_PAWN : SET_TEXT_COLOR_WHITE + BLACK_PAWN;
-            default -> EMPTY;
-        };
-    }
 
     public String quitGame(String... params){
         activeChessGameData = null;
@@ -290,18 +245,92 @@ public class ChessClient {
         if (params.length != 1) {
             throw new ResponseException(400, "Expected: <gameID>");
         }
-        int gameID = Integer.parseInt(params[0]);
+        int gameID;
+        try {
+            gameID = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Invalid Game ID format. Please enter a number.");
+        }
 
         List<GameData> games = server.listGames(currentUser.authToken());
         for(GameData game : games){
             if(game.gameID() == gameID){
                 activeChessGameData = game;
-                state = State.GAMESTATE;
-                return displayBoard(activeChessGameData, "white") +
+                state = State.OBSERVATION;
+                ws = new WebSocketFacade(serverUrl, notificationHandler);
+                ws.connect(currentUser.authToken(), gameID, null);
+                this.playerColor = null;
+
+                return ChessBoardDrawer.displayBoard(activeChessGameData.game().getBoard(), "white") +
                         String.format(SET_TEXT_COLOR_GREEN + "Observing game %d", gameID);
             }
         }
         return String.format(SET_TEXT_COLOR_RED + "Sorry, game %d does not exist!", gameID);
+    }
+
+    // IN GAME WS METHODS
+    public String makeMove(String... params) throws ResponseException {
+        assertInGame();
+        if(state == State.OBSERVATION) throw new ResponseException(400, "Observers cannot make moves.");
+        if (params.length != 1) throw new ResponseException(400, "Expected: makeMove <ex: e2e4>");
+
+        String moveString = params[0];
+        ChessMove move;
+        try {
+            ChessPosition start = parsePosition(moveString.substring(0, 2));
+            ChessPosition end = parsePosition(moveString.substring(2, 4));
+            ChessPiece.PieceType promotion = null;
+            if (moveString.length() == 5) {
+                promotion = parsePromotionPiece(moveString.substring(4, 5));
+            }
+            move = new ChessMove(start, end, promotion);
+        } catch (Exception e) {
+            throw new ResponseException(400, "Invalid move format. Use algebraic notation (e.g., e2e4, a7a8q).");
+        }
+
+        ws.makeMove(currentUser.authToken(), activeChessGameData.gameID(), move);
+        return "";
+    }
+
+    public String leaveGame() throws ResponseException {
+        assertInGameOrObserving();
+        if (ws != null) {
+            ws.leave(currentUser.authToken(), activeChessGameData.gameID());
+        }
+        String leftMessage = String.format("You have left game: %s.", activeChessGameData.gameName());
+        activeChessGameData = null;
+        playerColor = null;
+        state = State.SIGNEDIN;
+        return SET_TEXT_COLOR_YELLOW + leftMessage + "\n" + help() + RESET_TEXT_COLOR;
+    }
+
+    public String resignGame() throws ResponseException {
+        assertInGame();
+        if(state == State.OBSERVATION) throw new ResponseException(400, "Observers cannot resign.");
+
+        ws.resign(currentUser.authToken(), activeChessGameData.gameID());
+        return SET_TEXT_COLOR_YELLOW + "Resignation request sent. Waiting for confirmation..." + RESET_TEXT_COLOR;
+    }
+
+
+
+
+    //Position Parse Methods
+    private ChessPosition parsePosition(String pos) {
+        int col = pos.toLowerCase().charAt(0) - 'a' + 1;
+        int row = Integer.parseInt(pos.substring(1));
+        if (col < 1 || col > 8 || row < 1 || row > 8) throw new IllegalArgumentException("Invalid position");
+        return new ChessPosition(row, col);
+    }
+
+    private ChessPiece.PieceType parsePromotionPiece(String piece) {
+        return switch (piece.toLowerCase()) {
+            case "q" -> ChessPiece.PieceType.QUEEN;
+            case "r" -> ChessPiece.PieceType.ROOK;
+            case "b" -> ChessPiece.PieceType.BISHOP;
+            case "n" -> ChessPiece.PieceType.KNIGHT;
+            default -> throw new IllegalArgumentException("Invalid promotion piece");
+        };
     }
 
     public String help() {
@@ -346,10 +375,46 @@ public class ChessClient {
     }
 
 
+
+
+    //Assert Methods
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
-            throw new ResponseException(400, "You must sign in");
+            throw new ResponseException(400, "You must be signed in to perform this action.");
         }
+    }
+
+    private void assertSignedInOrInGame() throws ResponseException {
+        if (state == State.SIGNEDOUT) {
+            throw new ResponseException(400, "You must be signed in or in a game to perform this action.");
+        }
+    }
+
+    private void assertInGame() throws ResponseException {
+        if (state != State.GAMESTATE) {
+            throw new ResponseException(400, "You must be playing in a game to perform this action.");
+        }
+        if (ws == null) {
+            throw new ResponseException(500, "Internal Error: WebSocket not connected while in game state.");
+        }
+    }
+
+    private void assertInGameOrObserving() throws ResponseException {
+        if (state != State.GAMESTATE && state != State.OBSERVATION) {
+            throw new ResponseException(400, "You must be playing or observing a game to perform this action.");
+        }
+        if (ws == null) {
+            throw new ResponseException(500, "Internal Error: WebSocket not connected while in game/observe state.");
+        }
+    }
+
+    public String getPlayerColor() {
+        if(playerColor == ChessGame.TeamColor.WHITE){
+            return "white";
+        } else if (playerColor == ChessGame.TeamColor.BLACK){
+            return "black";
+        }
+        return null;
     }
 
 }

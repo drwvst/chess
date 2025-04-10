@@ -7,6 +7,7 @@ import websocket.messages.*;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
+
 public class Repl implements NotificationHandler {
     private final ChessClient client;
     private final Gson gson = new Gson();
@@ -47,7 +48,7 @@ public class Repl implements NotificationHandler {
                         LoadGameMessage loadData = (LoadGameMessage) message;
                         chess.ChessGame game = loadData.getGame();
                         System.out.println("\n" + SET_TEXT_COLOR_YELLOW + "Game state updated/loaded." + RESET_TEXT_COLOR);
-                        System.out.println(ChessBoardDrawer.drawBoard(game.getBoard(), client.getPlayerColor()));
+                        System.out.println(ChessBoardDrawer.displayBoard(game.getBoard(), client.getPlayerColor()));
                     } else {
                         System.out.println("\n" + SET_TEXT_COLOR_RED + "Received LOAD_GAME message but in unexpected format.");
                     }

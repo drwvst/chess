@@ -85,7 +85,8 @@ public class Repl implements NotificationHandler {
                 break; // Added break
 
             default:
-                System.out.println("\n" + SET_TEXT_COLOR_YELLOW + "Unknown message type received: " + message.getServerMessageType() + RESET_TEXT_COLOR);
+                System.out.println("\n" + SET_TEXT_COLOR_YELLOW + "Unknown message type received: "
+                        + message.getServerMessageType() + RESET_TEXT_COLOR);
                 break;
         }
         printPrompt();

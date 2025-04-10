@@ -125,7 +125,7 @@ public class WebSocketHandler {
     private void MakeMoveHandler(String playerName, String messageJson, Session session) throws IOException,
             DataAccessException, InvalidMoveException {
 
-        MakeMoveCommand moveCommand = gson.fromJson(messageJson, MakeMoveCommand.class);
+        makeMoveCommand moveCommand = gson.fromJson(messageJson, makeMoveCommand.class);
         Integer gameID = moveCommand.getGameID();
         ChessMove move = moveCommand.getMove();
 
@@ -231,7 +231,8 @@ public class WebSocketHandler {
                 }
             }
         } catch (DataAccessException e) {
-            System.err.println("Database error trying to update game during leave for user " + playerName + " game " + gameID + ": " + e.getMessage());
+            System.err.println("Database error trying to update game during leave for user " + playerName + " game "
+                    + gameID + ": " + e.getMessage());
         }
 
         connectionManager.remove(playerName);

@@ -66,7 +66,8 @@ class ChessBoardDrawer {
         };
     }
 
-    public static String drawBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition highlightSource, Collection<ChessMove> validMoves) {
+    public static String drawBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective,
+                                                 ChessPosition highlightSource, Collection<ChessMove> validMoves) {
         StringBuilder boardString = new StringBuilder();
         boolean isWhitePlayer = (perspective == ChessGame.TeamColor.WHITE);
 

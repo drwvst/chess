@@ -33,7 +33,9 @@ public class ChessClient {
     }
 
     public String eval(String input){
-        if (quitting) return "quit";
+        if (quitting) {
+            return "quit";
+        }
 
         try {
             var tokens = input.toLowerCase().split(" ");
@@ -232,14 +234,6 @@ public class ChessClient {
         return String.format(SET_TEXT_COLOR_GREEN + "You have successfully logged out, %s!\n\n%s", username, help());
     }
 
-
-    public String quitGame(String... params){
-        activeChessGameData = null;
-        state = State.SIGNEDIN;
-        return String.format(SET_TEXT_COLOR_GREEN +
-                "You have exited the game and returned to the main menu.\n%s",help());
-    }
-
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length != 1) {
@@ -272,7 +266,9 @@ public class ChessClient {
     public String makeMove(String... params) throws ResponseException {
         assertInGame();
         if(state == State.OBSERVATION) throw new ResponseException(400, "Observers cannot make moves.");
-        if (params.length != 1) throw new ResponseException(400, "Expected: makeMove <ex: e2e4>");
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: makeMove <ex: e2e4>");
+        }
 
         String moveString = params[0];
         ChessMove move;
@@ -325,7 +321,9 @@ public class ChessClient {
 
     public String highlightMoves(String... params) throws ResponseException {
         assertInGameOrObserving();
-        if (params.length != 1) throw new ResponseException(400, "Expected: highlight <position (ex: e2)>");
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: highlight <position (ex: e2)>");
+        }
         if (activeChessGameData == null || activeChessGameData.game() == null) {
             return SET_TEXT_COLOR_YELLOW + "No active game state available." + RESET_TEXT_COLOR;
         }
@@ -381,7 +379,9 @@ public class ChessClient {
     private ChessPosition parsePosition(String pos) {
         int col = pos.toLowerCase().charAt(0) - 'a' + 1;
         int row = Integer.parseInt(pos.substring(1));
-        if (col < 1 || col > 8 || row < 1 || row > 8) throw new IllegalArgumentException("Invalid position");
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            throw new IllegalArgumentException("Invalid position");
+        }
         return new ChessPosition(row, col);
     }
 
@@ -499,5 +499,4 @@ public class ChessClient {
         }
         return null;
     }
-
 }

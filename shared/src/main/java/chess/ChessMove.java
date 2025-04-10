@@ -73,7 +73,9 @@ public class ChessMove {
 
     //Helpers
     private String positionToAlgebraic(ChessPosition pos) {
-        if (pos == null) return "?";
+        if (pos == null){
+            return "?";
+        }
         char file = (char) ('a' + pos.getColumn() - 1);
         return "" + file + pos.getRow();
     }

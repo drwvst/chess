@@ -356,6 +356,23 @@ public class ChessClient {
                 perspective, position, validMoves);
     }
 
+    public void updateActiveGame(ChessGame updatedGame) {
+        if (this.activeChessGameData != null) {
+            this.activeChessGameData = new GameData(
+                    this.activeChessGameData.gameID(),
+                    this.activeChessGameData.whiteUsername(),
+                    this.activeChessGameData.blackUsername(),
+                    this.activeChessGameData.gameName(),
+                    updatedGame,
+                    updatedGame.isGameOver() ? GameStatus.FINISHED : GameStatus.ACTIVE
+            );
+            System.out.println("Client game state updated."); // Debug message
+        } else {
+            System.err.println("Warning: Received game update but no active game context set.");
+        }
+    }
+
+
 
 
 
@@ -403,9 +420,9 @@ public class ChessClient {
                     Available commands (%s):
                        redraw                               - Redraw the chessboard
                        leave                                - Leave the current game
-                       makeMove <FROM_TO[PROMO]>            - Make a move (e.g., e2e4, a7a8q)
+                       makeMove <FROM_TO[PROMO]>            - Make a move (ex: e2e4)
                        resign                               - Forfeit the match (players only)
-                       highlight <POSITION>                 - Show legal moves for piece at position (e.g., e2)
+                       highlight <POSITION>                 - Show legal moves for piece at position (ex: e2)
                        help                                 - Show this message
                     """.formatted(state == State.GAMESTATE ? "Playing" : "Observing") + RESET_TEXT_COLOR;
         }else {

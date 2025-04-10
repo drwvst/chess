@@ -153,7 +153,7 @@ public class WebSocketHandler {
 
         ChessGame currentGame = gameData.game();
         if (currentGame.getTeamTurn() != playerColor) {
-            wsSessionError(session, "Error: It is not your turn. Please wait.");
+            wsSessionError(session, "It is not your turn. Please wait.");
             return;
         }
 

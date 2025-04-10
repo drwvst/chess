@@ -32,12 +32,35 @@ public class WebSocketFacade extends Endpoint{
                 @Override
                 public void onMessage(String message) {
                     try {
-                        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-                        notificationHandler.notify(serverMessage);
+                        ServerMessage baseMsg = gson.fromJson(message, ServerMessage.class);
+                        ServerMessage.ServerMessageType messageType = baseMsg.getServerMessageType();
+
+                        if (messageType == null) {
+                            throw new Exception("Received message with null serverMessageType: " + message);
+                        }
+                        ServerMessage specificMessageObject = null;
+                        switch (messageType) {
+                            case LOAD_GAME:
+                                specificMessageObject = gson.fromJson(message, LoadGameMessage.class);
+                                break;
+                            case ERROR:
+                                specificMessageObject = gson.fromJson(message, ErrorMessage.class);
+                                break;
+                            case NOTIFICATION:
+                                specificMessageObject = gson.fromJson(message, ServerMessage.class);
+                                break;
+                            default:
+                                System.err.println("Warning: Unknown server message type received: " + messageType);
+                                break;
+                        }
+
+                        if (specificMessageObject != null) {
+                            notificationHandler.notify(specificMessageObject);
+                        }
 
                     } catch (Exception e) {
-                        System.err.println("WebSocket JSON Deserialization Error: " + e.getMessage());
-                        ErrorMessage errorForHandler = new ErrorMessage("Client Error: Could not parse server message. " + e.getMessage());
+                        System.err.println("WebSocket Message Error: Failed to process message '" + message + "'. Error: " + e.getMessage());
+                        ErrorMessage errorForHandler = new ErrorMessage("Client Error: Could not parse server message. Details: " + e.getMessage());
                         notificationHandler.notify(errorForHandler);
                     }
                 }
@@ -52,10 +75,10 @@ public class WebSocketFacade extends Endpoint{
         //System.out.println("WebSocket connection opened.");
     }
 
-//    @Override
-//    public void onClose(Session session, CloseReason closeReason) {
-//        System.out.println("WebSocket connection closed: " + closeReason.getReasonPhrase());
-//    }
+    @Override
+    public void onClose(Session session, CloseReason closeReason) {
+        //System.out.println("WebSocket connection closed: " + closeReason.getReasonPhrase());
+    }
 
     @Override
     public void onError(Session session, Throwable thr) {

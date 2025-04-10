@@ -47,6 +47,9 @@ public class Repl implements NotificationHandler {
                     if (message instanceof LoadGameMessage) {
                         LoadGameMessage loadData = (LoadGameMessage) message;
                         chess.ChessGame game = loadData.getGame();
+
+                        client.updateActiveGame(game);
+
                         System.out.println("\n" + SET_TEXT_COLOR_YELLOW + "Game state updated/loaded." + RESET_TEXT_COLOR);
                         System.out.println(ChessBoardDrawer.displayBoard(game.getBoard(), client.getPlayerColor()));
                     } else {

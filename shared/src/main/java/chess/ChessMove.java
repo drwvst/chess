@@ -59,4 +59,32 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, promotionPiece);
     }
+
+    @Override
+    public String toString() {
+        String startAlg = positionToAlgebraic(startPosition);
+        String endAlg = positionToAlgebraic(endPosition);
+        String promoString = "";
+        if (promotionPiece != null) {
+            promoString = "=" + getPromotionChar(promotionPiece);
+        }
+        return startAlg + " to " + endAlg + promoString;
+    }
+
+    //Helpers
+    private String positionToAlgebraic(ChessPosition pos) {
+        if (pos == null) return "?";
+        char file = (char) ('a' + pos.getColumn() - 1);
+        return "" + file + pos.getRow();
+    }
+
+    private String getPromotionChar(ChessPiece.PieceType type) {
+        return switch (type) {
+            case QUEEN -> "Q";
+            case ROOK -> "R";
+            case BISHOP -> "B";
+            case KNIGHT -> "N";
+            default -> ""; // Should not happen for promotion
+        };
+    }
 }

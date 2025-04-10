@@ -15,30 +15,23 @@ class ChessBoardDrawer {
         StringBuilder boardString = new StringBuilder();
         ChessBoard board = chessBoard;
 
-        boolean isWhitePlayer = playerColor.equalsIgnoreCase("white");
+        boolean isWhitePlayer = (playerColor == null || playerColor.equalsIgnoreCase("white"));
 
         boardString.append("\n").append(SET_BG_COLOR_GREY).append("   ");
-
         playerColorCoordinateSet(boardString, isWhitePlayer);
 
         for (int row = 1; row <= 8; row++) {
             int boardRow = isWhitePlayer ? (9 - row) : row;
-
             boardString.append(SET_BG_COLOR_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(boardRow).append(" ");
 
             for (int col = 1; col <= 8; col++) {
                 int boardCol = isWhitePlayer ? col : (9 - col);
-
                 ChessPiece piece = board.getPiece(new ChessPosition(boardRow, boardCol));
-
-                if ((boardRow + boardCol) % 2 == 0) {
-                    boardString.append(SET_BG_COLOR_DARK_BROWN);
-                } else {
-                    boardString.append(SET_BG_COLOR_LIGHT_BROWN);
-                }
+                boolean isLightSquare = (boardRow + boardCol) % 2 == 0;
+                boardString.append(isLightSquare ? SET_BG_COLOR_LIGHT_BROWN : SET_BG_COLOR_DARK_BROWN);
 
                 if (piece != null) {
-                    String pieceChar = getPieceChar(piece, playerColor);
+                    String pieceChar = getPieceChar(piece);
                     boardString.append(pieceChar);
                 } else {
                     boardString.append(EMPTY);
@@ -52,13 +45,25 @@ class ChessBoardDrawer {
         }
 
         boardString.append(SET_BG_COLOR_GREY).append("   ");
-
         playerColorCoordinateSet(boardString, isWhitePlayer);
 
         boardString.append(RESET_BG_COLOR);
         boardString.append(RESET_TEXT_COLOR);
         boardString.append("\n");
         return boardString.toString();
+    }
+
+    private static String getPieceChar(ChessPiece piece) {
+        boolean isBlackPiece = piece.getTeamColor() == ChessGame.TeamColor.BLACK;
+        return switch (piece.getPieceType()) {
+            case KING -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KING : SET_TEXT_COLOR_WHITE + BLACK_KING;
+            case QUEEN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_QUEEN : SET_TEXT_COLOR_WHITE + BLACK_QUEEN;
+            case ROOK -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_ROOK : SET_TEXT_COLOR_WHITE + BLACK_ROOK;
+            case BISHOP -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_BISHOP : SET_TEXT_COLOR_WHITE + BLACK_BISHOP;
+            case KNIGHT -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KNIGHT : SET_TEXT_COLOR_WHITE + BLACK_KNIGHT;
+            case PAWN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_PAWN : SET_TEXT_COLOR_WHITE + BLACK_PAWN;
+            default -> EMPTY;
+        };
     }
 
     public static String drawBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition highlightSource, Collection<ChessMove> validMoves) {
@@ -99,7 +104,7 @@ class ChessBoardDrawer {
                 boardString.append(bgColor);
 
                 if (piece != null) {
-                    String pieceChar = getPieceChar(piece, perspective.toString());
+                    String pieceChar = getPieceChar(piece);
                     boardString.append(pieceChar);
                 } else {
                     boardString.append(EMPTY);
@@ -137,17 +142,4 @@ class ChessBoardDrawer {
         boardString.append("   ").append(RESET_BG_COLOR).append("\n");
     }
 
-    private static String getPieceChar(ChessPiece piece, String playerColor) {
-        boolean isBlackPiece = piece.getTeamColor() == ChessGame.TeamColor.BLACK;
-
-        return switch (piece.getPieceType()) {
-            case KING -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KING : SET_TEXT_COLOR_WHITE + BLACK_KING;
-            case QUEEN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_QUEEN : SET_TEXT_COLOR_WHITE + BLACK_QUEEN;
-            case ROOK -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_ROOK : SET_TEXT_COLOR_WHITE + BLACK_ROOK;
-            case BISHOP -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_BISHOP : SET_TEXT_COLOR_WHITE + BLACK_BISHOP;
-            case KNIGHT -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_KNIGHT : SET_TEXT_COLOR_WHITE + BLACK_KNIGHT;
-            case PAWN -> isBlackPiece ? SET_TEXT_COLOR_BLACK + BLACK_PAWN : SET_TEXT_COLOR_WHITE + BLACK_PAWN;
-            default -> EMPTY;
-        };
-    }
 }

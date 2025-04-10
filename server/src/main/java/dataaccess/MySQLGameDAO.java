@@ -94,7 +94,7 @@ public class MySQLGameDAO {
                 if (rs.next()) {
                     return extractGame(rs);
                 } else {
-                    throw new DataAccessException("Error: Game with ID " + gameID + " not found.");
+                    throw new DataAccessException("Game with ID " + gameID + " not found.");
                 }
             }
         } catch (SQLException e) {

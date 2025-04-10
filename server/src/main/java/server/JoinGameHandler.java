@@ -25,7 +25,7 @@ public class JoinGameHandler implements Route{
         } catch (Exception e) {
             if(Objects.equals(e.getMessage(), "bad request")){
                 response.status(400);
-                return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
+                return gson.toJson(new ErrorMessage(e.getMessage()));
             }
             if(Objects.equals(e.getMessage(), "unauthorized")){
                 response.status(401);
@@ -36,7 +36,7 @@ public class JoinGameHandler implements Route{
                 return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
             }
             response.status(500);
-            return gson.toJson(new ErrorMessage("Error: " + e.getMessage()));
+            return gson.toJson(new ErrorMessage(e.getMessage()));
         }
     }
 

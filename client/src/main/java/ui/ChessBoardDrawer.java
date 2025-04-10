@@ -3,6 +3,10 @@ package ui;
 import chess.*;
 import model.GameData;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.EMPTY;
 
@@ -57,13 +61,65 @@ class ChessBoardDrawer {
         return boardString.toString();
     }
 
-    public static String drawBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective, java.util.Collection<ChessMove> validMoves) {
-        // TODO: Implement board drawing with highlighted valid move squares
-        StringBuilder highlights = new StringBuilder(" Valid Moves:");
-        for (ChessMove move : validMoves) {
-            highlights.append(" ").append(move.getEndPosition());
+    public static String drawBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition highlightSource, Collection<ChessMove> validMoves) {
+        StringBuilder boardString = new StringBuilder();
+        boolean isWhitePlayer = (perspective == ChessGame.TeamColor.WHITE);
+
+        Set<ChessPosition> highlightTargets = new HashSet<>();
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                highlightTargets.add(move.getEndPosition());
+            }
         }
-        return "\n --- Chess Board Placeholder (Perspective: " + perspective + ") --- \n" + board.toString() + highlights.toString() + "\n --- End Board --- \n";
+
+        boardString.append("\n").append(SET_BG_COLOR_GREY).append("   ");
+        playerColorCoordinateSet(boardString, isWhitePlayer);
+
+        for (int row = 1; row <= 8; row++) {
+            int boardRow = isWhitePlayer ? (9 - row) : row;
+
+            boardString.append(SET_BG_COLOR_GREY)
+                    .append(SET_TEXT_COLOR_BLACK).append(" ").append(boardRow).append(" ");
+
+            for (int col = 1; col <= 8; col++) {
+                int boardCol = isWhitePlayer ? col : (9 - col);
+                ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
+                ChessPiece piece = board.getPiece(currentPos);
+
+                String bgColor;
+                if (highlightSource != null && highlightSource.equals(currentPos)) {
+                    bgColor = SET_BG_COLOR_YELLOW;
+                } else if (highlightTargets.contains(currentPos)) {
+                    bgColor = SET_BG_COLOR_GREEN;
+                } else {
+                    boolean isLightSquare = (boardRow + boardCol) % 2 == 0;
+                    bgColor = isLightSquare ? SET_BG_COLOR_LIGHT_BROWN : SET_BG_COLOR_DARK_BROWN;
+                }
+
+                boardString.append(bgColor);
+
+                if (piece != null) {
+                    String pieceChar = getPieceChar(piece, perspective.toString());
+                    boardString.append(pieceChar);
+                } else {
+                    boardString.append(EMPTY);
+                }
+
+                boardString.append(RESET_BG_COLOR);
+            }
+
+            boardString.append(SET_BG_COLOR_GREY)
+                    .append(SET_TEXT_COLOR_BLACK).append(" ").append(boardRow).append(" ").append(RESET_BG_COLOR)
+                    .append("\n");
+        }
+
+        boardString.append(SET_BG_COLOR_GREY).append("   ");
+        playerColorCoordinateSet(boardString, isWhitePlayer);
+
+        boardString.append(RESET_BG_COLOR);
+        boardString.append(RESET_TEXT_COLOR);
+        boardString.append("\n");
+        return boardString.toString();
     }
 
 

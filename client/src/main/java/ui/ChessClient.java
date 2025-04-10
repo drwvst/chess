@@ -76,11 +76,11 @@ public class ChessClient {
 
     private String evalInGame(String command, String... parameters) throws ResponseException {
         return switch (command) {
-//            case "makemove" -> makeMove(parameters);
-//            case "leave" -> leaveGame();
-//            case "resign" -> resignGame();
-//            case "redraw" -> redrawBoard();
-//            case "highlight" -> highlightMoves(parameters);
+            case "makemove" -> makeMove(parameters);
+            case "leave" -> leaveGame();
+            case "resign" -> resignGame();
+            case "redraw" -> redrawBoard();
+            case "highlight" -> highlightMoves(parameters);
             // Add other in-game commands (show legal moves)
             default -> help();
         };
@@ -312,6 +312,51 @@ public class ChessClient {
         return SET_TEXT_COLOR_YELLOW + "Resignation request sent. Waiting for confirmation..." + RESET_TEXT_COLOR;
     }
 
+    public String redrawBoard() throws ResponseException {
+        assertInGameOrObserving();
+        if (activeChessGameData == null || activeChessGameData.game() == null) {
+            return SET_TEXT_COLOR_YELLOW + "No active game state to draw." + RESET_TEXT_COLOR;
+        }
+        if(getPlayerColor() == null){
+            return SET_TEXT_COLOR_YELLOW + "Cannot redraw board as observer" + RESET_TEXT_COLOR;
+        }
+        return ChessBoardDrawer.displayBoard(activeChessGameData.game().getBoard(), getPlayerColor());
+    }
+
+    public String highlightMoves(String... params) throws ResponseException {
+        assertInGameOrObserving();
+        if (params.length != 1) throw new ResponseException(400, "Expected: highlight <position (ex: e2)>");
+        if (activeChessGameData == null || activeChessGameData.game() == null) {
+            return SET_TEXT_COLOR_YELLOW + "No active game state available." + RESET_TEXT_COLOR;
+        }
+
+        ChessPosition position;
+        try {
+            position = parsePosition(params[0]);
+        } catch (Exception e) {
+            throw new ResponseException(400, "Invalid position format. Use coordinate notation (ex: 'e2').");
+        }
+
+        ChessPiece piece = activeChessGameData.game().getBoard().getPiece(position);
+        if (piece == null) {
+            return SET_TEXT_COLOR_YELLOW + "No piece at " + params[0] + "." + RESET_TEXT_COLOR;
+        }
+
+        if (state == State.GAMESTATE && piece.getTeamColor() != this.playerColor) {
+            return SET_TEXT_COLOR_YELLOW + "You can only highlight your own pieces." + RESET_TEXT_COLOR;
+        }
+
+        java.util.Collection<ChessMove> validMoves = activeChessGameData.game().validMoves(position);
+        if (validMoves == null || validMoves.isEmpty()) {
+            return SET_TEXT_COLOR_YELLOW + "No valid moves for the piece at " + params[0] + "." + RESET_TEXT_COLOR;
+        }
+
+        ChessGame.TeamColor perspective = (this.playerColor != null) ? this.playerColor : ChessGame.TeamColor.WHITE;
+        return ChessBoardDrawer.drawBoardWithHighlights(activeChessGameData.game().getBoard(),
+                perspective, position, validMoves);
+    }
+
+
 
 
 
@@ -336,27 +381,34 @@ public class ChessClient {
     public String help() {
         if (state == State.SIGNEDOUT){
             return SET_TEXT_COLOR_BLUE + """
-                    - Register <username> <password> <email>
-                    - Login <username> <password>
-                    - Help
-                    - Quit
+                    Available commands:
+                        register <USERNAME> <PASSWORD> <EMAIL>   - Create an account
+                        login <USERNAME> <PASSWORD>              - Log in to your account
+                        quit                                     - Exit the application
+                        help                                     - Show this message
                     """;
         } else if(state == State.SIGNEDIN){
             return SET_TEXT_COLOR_BLUE + """
-                - CreateGame <game name>
-                - ListGames
-                - JoinGame <gameID> <playerColor>
-                - ObserveGame <gameID>
-                - Logout
-                - Help
-                - Quit
+                Available commands:
+                    createGame <GAME_NAME>               - Create a new chess game
+                    listGames                            - Show available games
+                    joinGame <GAME_ID> <WHITE|BLACK>     - Join a game as a player
+                    observeGame <GAME_ID>                - Watch a game
+                    logout                               - Log out
+                    quit                                 - Exit the application
+                    help                                 - Show this message
                 """;
-        } else if(state == State.OBSERVATION){
+        } else if(state == State.OBSERVATION || state == State.GAMESTATE){
             return SET_TEXT_COLOR_BLUE + """
-                    - QuitGame
-                    - Help
-                    """;
-        }else { //GAMESTATE
+                    Available commands (%s):
+                       redraw                               - Redraw the chessboard
+                       leave                                - Leave the current game
+                       makeMove <FROM_TO[PROMO]>            - Make a move (e.g., e2e4, a7a8q)
+                       resign                               - Forfeit the match (players only)
+                       highlight <POSITION>                 - Show legal moves for piece at position (e.g., e2)
+                       help                                 - Show this message
+                    """.formatted(state == State.GAMESTATE ? "Playing" : "Observing") + RESET_TEXT_COLOR;
+        }else {
             return SET_TEXT_COLOR_BLUE + """
                     - QuitGame
                     - Help
@@ -365,12 +417,26 @@ public class ChessClient {
     }
 
     public String quit() throws ResponseException {
-        if (state == State.SIGNEDIN) {
-            server.logout(currentUser.authToken());
-            state = State.SIGNEDOUT;
-            System.out.println(SET_TEXT_COLOR_GREEN + "You have been logged out. Goodbye!");
-            return "quit";
+        quitting = true;
+        if (ws != null) {
+            try {
+                if (state == State.GAMESTATE || state == State.OBSERVATION) {
+                    ws.leave(currentUser.authToken(), activeChessGameData.gameID());
+                }
+                ws.close();
+                ws = null;
+            } catch (ResponseException | NullPointerException e) {
+                System.out.println(SET_TEXT_COLOR_YELLOW + "Note: Error closing WebSocket during quit: " + e.getMessage() + RESET_TEXT_COLOR);
+            }
         }
+        if (state != State.SIGNEDOUT && currentUser != null) {
+            try {
+                server.logout(currentUser.authToken());
+            } catch (ResponseException e) {
+                System.out.println(SET_TEXT_COLOR_YELLOW + "Note: Error logging out during quit: " + e.getMessage() + RESET_TEXT_COLOR);
+            }
+        }
+        System.out.println(SET_TEXT_COLOR_MAGENTA + "Exiting Chess Client. Goodbye!" + RESET_TEXT_COLOR);
         return "quit";
     }
 

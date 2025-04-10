@@ -46,7 +46,7 @@ public class ChessClient {
                 case GAMESTATE, OBSERVATION -> evalInGame(command, parameters);
             };
         } catch (ResponseException ex) {
-            return SET_TEXT_COLOR_RED + "Error: " + ex.getMessage() + RESET_TEXT_COLOR;
+            return SET_TEXT_COLOR_RED + ex.getMessage() + RESET_TEXT_COLOR;
         } catch (Exception ex) {
             return SET_TEXT_COLOR_RED + "Unexpected Error: " + ex.getMessage() + RESET_TEXT_COLOR;
         }

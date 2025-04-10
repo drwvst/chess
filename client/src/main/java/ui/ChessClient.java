@@ -302,19 +302,27 @@ public class ChessClient {
 
     public String resignGame() throws ResponseException {
         assertInGame();
-        if(state == State.OBSERVATION) throw new ResponseException(400, "Observers cannot resign.");
+        if (state == State.OBSERVATION) {
+            throw new ResponseException(400, "Observers cannot resign.");
+        }
 
-        ws.resign(currentUser.authToken(), activeChessGameData.gameID());
-        return SET_TEXT_COLOR_YELLOW + "Resignation request sent. Waiting for confirmation..." + RESET_TEXT_COLOR;
+        System.out.print(SET_TEXT_COLOR_YELLOW + "Are you sure you want to resign? (y/n): " + RESET_TEXT_COLOR);
+
+        java.util.Scanner scanner = new java.util.Scanner(System.in);
+        String input = scanner.nextLine().trim().toLowerCase();
+
+        if (input.equals("y") || input.equals("yes")) {
+            ws.resign(currentUser.authToken(), activeChessGameData.gameID());
+            return SET_TEXT_COLOR_YELLOW + "You have resigned from the game." + RESET_TEXT_COLOR;
+        } else {
+            return SET_TEXT_COLOR_GREEN + "Resignation cancelled." + RESET_TEXT_COLOR;
+        }
     }
 
     public String redrawBoard() throws ResponseException {
         assertInGameOrObserving();
         if (activeChessGameData == null || activeChessGameData.game() == null) {
             return SET_TEXT_COLOR_YELLOW + "No active game state to draw." + RESET_TEXT_COLOR;
-        }
-        if(getPlayerColor() == null){
-            return SET_TEXT_COLOR_YELLOW + "Cannot redraw board as observer" + RESET_TEXT_COLOR;
         }
         return ChessBoardDrawer.displayBoard(activeChessGameData.game().getBoard(), getPlayerColor());
     }
@@ -340,9 +348,9 @@ public class ChessClient {
             return SET_TEXT_COLOR_YELLOW + "No piece at " + params[0] + "." + RESET_TEXT_COLOR;
         }
 
-        if (state == State.GAMESTATE && piece.getTeamColor() != this.playerColor) {
-            return SET_TEXT_COLOR_YELLOW + "You can only highlight your own pieces." + RESET_TEXT_COLOR;
-        }
+//        if (state == State.GAMESTATE && piece.getTeamColor() != this.playerColor) {
+//            return SET_TEXT_COLOR_YELLOW + "You can only highlight your own pieces." + RESET_TEXT_COLOR;
+//        }
 
         java.util.Collection<ChessMove> validMoves = activeChessGameData.game().validMoves(position);
         if (validMoves == null || validMoves.isEmpty()) {
